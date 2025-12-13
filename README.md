@@ -1,156 +1,294 @@
-# RadioHub - Radio Streaming Platform
+# Claude Built Stack
 
-A comprehensive radio streaming platform with multiple stations, user management, and live streaming capabilities built with Node.js/Express and PostgreSQL.
+A full-stack web platform showcasing modern AI-assisted development with Claude Code, MCP, and AWS Bedrock. This project demonstrates rapid feature development, production-ready architecture, and end-to-end testing practices.
 
-## Tech Stack
+## 🎯 Project Purpose
 
-- **Web Server**: Node.js with Express.js
-- **Database**: PostgreSQL 17
-- **Environment Management**: dotenv
+This is a portfolio/learning project that showcases:
+- **AI-Assisted Development**: Built collaboratively with Claude Code and MCP servers
+- **Full-Stack Capabilities**: Complete CRUD operations, real-time streaming, audit logging
+- **Modern Architecture**: RESTful APIs, connection pooling, responsive frontend
+- **Production Practices**: Environment management, error handling, security patterns
 
-## Installation
+## ✨ Features
 
-The environment has been set up with the following components:
+### Radio Streaming Platform
+- **Live HLS Streaming**: CloudFront-powered HLS streams with HLS.js player
+- **SHOUTcast Support**: HTML5 audio player for 92.3 FM station
+- **Real-time Metadata**: Polling-based song info updates with album art
+- **Song Rating System**: IP-based rating with up/down votes and persistence
+- **Track History**: Display recent songs with artist information
 
-1. Node.js v22.21.1 with npm 11.7.0
-2. Express.js web server
-3. PostgreSQL 17 database
-4. Database connection pool with pg library
+### User Management System
+- **Full CRUD Operations**: Create, read, update, delete users
+- **Email Uniqueness**: Database-level constraints with proper error handling
+- **Audit Trail**: All operations logged with IP addresses and change tracking
+- **RESTful API**: Clean JSON endpoints with proper status codes
 
-## Project Structure
+### Student Registry
+- **Academic Management**: Student records with name, email, grade, and major
+- **Grade Validation**: Dropdown selection for academic levels
+- **Search & Sort**: Frontend filtering and sorting capabilities
+- **Integrated Audit**: All student operations tracked in audit log
 
+### Audit Logging
+- **Comprehensive Tracking**: All CREATE/UPDATE/DELETE operations logged
+- **JSONB Storage**: Flexible change tracking with PostgreSQL JSONB
+- **IP Tracking**: User identification via request IP addresses
+- **Query Interface**: Retrieve and analyze audit logs via API
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Runtime**: Node.js v22.21.1
+- **Framework**: Express.js
+- **Database**: PostgreSQL 17 with pg connection pooling
+- **Environment**: dotenv for configuration management
+
+### Frontend
+- **Vanilla JavaScript**: No framework dependencies for clarity
+- **HLS.js**: Professional-grade HLS streaming library
+- **Responsive Design**: Mobile-first CSS with RadioCalico branding
+- **Fetch API**: Modern async HTTP requests
+
+### Development Tools
+- **AI Assistance**: Claude Code, MCP servers, AWS Bedrock
+- **Dev Server**: Nodemon for hot-reload development
+- **Version Control**: Git with GitHub
+- **Database Client**: PostgreSQL CLI tools
+
+## 📡 API Endpoints
+
+### System Health
 ```
-radiocalco/
-├── server.js           # Main Express server
-├── db.js              # Database connection configuration
-├── .env               # Environment variables (not in git)
-├── .env.example       # Example environment variables
-├── package.json       # Project dependencies
-├── public/            # Static files (HTML, CSS, JS, images)
-└── README.md          # This file
+GET /api/health          - Health check with timestamp
+GET /api/test-db         - Database connection test
+GET /api/audit           - Retrieve audit logs (last 1000)
 ```
 
-## Getting Started
+### User Management
+```
+GET    /api/users        - List all users
+GET    /api/users/:id    - Get single user
+POST   /api/users        - Create user (name, email)
+PUT    /api/users/:id    - Update user (name, email)
+DELETE /api/users/:id    - Delete user (logged)
+```
 
-### 1. Start the Development Server
+### Student Management
+```
+GET    /api/students        - List all students
+GET    /api/students/:id    - Get single student
+POST   /api/students        - Create student (name, email, grade, major?)
+PUT    /api/students/:id    - Update student (name, email, grade, major?)
+DELETE /api/students/:id    - Delete student (logged)
+```
 
+### Song Ratings
+```
+GET  /api/ratings/:title/:artist  - Get rating counts + user's rating
+POST /api/ratings                  - Submit/update rating (title, artist, rating: "up"|"down")
+```
+
+All endpoints return JSON with `status`, `message`, and `data` fields. Errors include appropriate HTTP status codes (400, 404, 500).
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js v22.21.1 or later
+- PostgreSQL 17
+- npm or yarn
+
+### Installation
+
+1. **Clone the repository**
 ```bash
-npm run dev
+git clone https://github.com/tech-uprise/claude-built-stack.git
+cd claude-built-stack
 ```
 
-This will start the server with nodemon, which automatically restarts when you make changes.
-
-Or use the production mode:
-
+2. **Install dependencies**
 ```bash
-npm start
+npm install
 ```
 
-### 2. Access the Application
+3. **Configure environment**
+```bash
+cp .env.example .env
+# Edit .env with your database credentials
+```
 
-Open your browser and navigate to:
-- **Main Page**: http://localhost:3000
-- **Health Check**: http://localhost:3000/api/health
-- **Database Test**: http://localhost:3000/api/test-db
+4. **Start PostgreSQL**
+```bash
+brew services start postgresql@17
+```
 
-## Database Configuration
+5. **Create database**
+```bash
+/usr/local/opt/postgresql@17/bin/createdb radiocalco_dev
+```
 
-The PostgreSQL database is configured with:
-- **Database Name**: radiocalco_dev
-- **Host**: localhost
-- **Port**: 5432
-- **User**: vasulf
-
-You can modify these settings in the `.env` file.
-
-## Available Scripts
-
-- `npm start` - Start the server in production mode
-- `npm run dev` - Start the server in development mode with auto-reload
-
-## Database Management
-
-### Access PostgreSQL CLI
-
+6. **Initialize database tables**
 ```bash
 /usr/local/opt/postgresql@17/bin/psql radiocalco_dev
 ```
 
-### Common PostgreSQL Commands
+Then run the SQL from `CLAUDE.md` (users, song_ratings, audit_log, students tables).
 
-- `\l` - List all databases
-- `\dt` - List all tables in current database
-- `\d table_name` - Describe a table
-- `\q` - Quit psql
+7. **Start development server**
+```bash
+npm run dev
+```
 
-### Stop/Start PostgreSQL Service
+8. **Access the application**
+- Main page: http://localhost:3000
+- User management: http://localhost:3000/users.html
+- Student registry: http://localhost:3000/students.html
+- Radio player: http://localhost:3000/radio.html
+- API docs: http://localhost:3000/api-docs.html
+
+## 🏗️ Architecture
+
+### Request Flow
+1. Express middleware processes JSON/URL-encoded bodies
+2. Static files served from `public/` directory
+3. API routes query PostgreSQL via connection pool
+4. All mutations trigger audit log entries
+5. Frontend updates via fetch() API calls
+
+### Database Design
+- **Connection Pooling**: pg Pool for efficient connections
+- **Parameterized Queries**: SQL injection prevention with `$1, $2...` placeholders
+- **Constraints**: UNIQUE constraints on emails, UNIQUE(song, artist, ip) for ratings
+- **Indexes**: Optimized queries on song_ratings, audit_log, students
+- **JSONB**: Flexible change tracking in audit_log
+
+### Security
+- All queries use parameterized statements (no SQL injection)
+- Email uniqueness enforced at database level
+- Input validation before processing
+- Error code 23505 (unique violation) handled specifically
+- IP addresses captured for audit trail
+
+### Frontend Architecture
+- No build step required - vanilla JavaScript
+- HLS.js loaded from CDN for streaming
+- Consistent branding: Montserrat/Open Sans fonts, RadioCalico colors
+- All pages use fetch() for async communication
+
+## 📂 Project Structure
+
+```
+claude-built-stack/
+├── server.js              # Main Express app with all routes
+├── db.js                  # PostgreSQL connection pool
+├── .env                   # Environment variables (not in git)
+├── .env.example           # Example environment template
+├── package.json           # Dependencies and scripts
+├── CLAUDE.md              # Claude Code project instructions
+├── public/                # Static frontend files
+│   ├── index.html         # Landing page
+│   ├── users.html         # User management UI
+│   ├── students.html      # Student registry UI
+│   ├── radio.html         # HLS radio player
+│   ├── radio-923.html     # SHOUTcast player
+│   ├── api-docs.html      # API documentation
+│   ├── audit.html         # Audit log viewer
+│   └── css/               # Stylesheets
+└── README.md              # This file
+```
+
+## 🧪 Testing
+
+Currently manual testing. To test the application:
+1. Start server with `npm run dev`
+2. Verify database at http://localhost:3000/api/test-db
+3. Test API endpoints via api-docs.html
+4. Test radio streams via radio.html and radio-923.html
+5. Test CRUD operations via users.html and students.html
+
+**Future**: End-to-end testing with Playwright/Cypress planned.
+
+## 🎨 Brand Guidelines
+
+The RadioCalico brand uses:
+- **Colors**: Mint (#D8F2D5), Forest Green (#1F4E23), Teal (#38A29D), Calico Orange (#EFA63C), Charcoal (#231F20), Cream (#F5EADA)
+- **Typography**: Montserrat (headings), Open Sans (body)
+- **Logo**: RadioCalicoLogoTM.png (cat with headphones)
+
+See `RadioCalico_Style_Guide.txt` for complete guidelines.
+
+## 🤖 AI Development Process
+
+This project leverages:
+- **Claude Code**: AI pair programming for rapid feature development
+- **MCP (Model Context Protocol)**: Enhanced context and tool integration
+- **AWS Bedrock**: [Planned] AI model deployment and scaling
+- **Iterative Development**: Human-AI collaboration for requirements → implementation → testing
+
+### Key Learning Outcomes
+- Effective AI-assisted full-stack development
+- RESTful API design and implementation
+- PostgreSQL schema design and optimization
+- Modern JavaScript patterns (async/await, fetch)
+- Production-ready error handling
+- Database connection management
+- Security best practices (SQL injection prevention, input validation)
+
+## 📝 Available Scripts
 
 ```bash
-# Stop PostgreSQL
-brew services stop postgresql@17
+npm start       # Production server
+npm run dev     # Development server with auto-reload
+```
 
-# Start PostgreSQL
+## 🔧 Database Management
+
+### Start/Stop PostgreSQL
+```bash
 brew services start postgresql@17
-
-# Check status
+brew services stop postgresql@17
 brew services list
 ```
 
-## API Endpoints
-
-### GET /
-Returns a welcome page with server status and available endpoints.
-
-### GET /api/health
-Returns server health status.
-
-**Response:**
-```json
-{
-  "status": "ok",
-  "timestamp": "2025-12-10T17:50:00.000Z"
-}
-```
-
-### GET /api/test-db
-Tests the database connection.
-
-**Response:**
-```json
-{
-  "status": "success",
-  "message": "Database connection successful",
-  "data": {
-    "current_time": "2025-12-10T17:50:00.000Z"
-  }
-}
-```
-
-## Adding Static Files
-
-Place your HTML, CSS, JavaScript, and image files in the `public/` directory. They will be automatically served by Express.
-
-Example:
-- `public/index.html` → http://localhost:3000/index.html
-- `public/styles.css` → http://localhost:3000/styles.css
-- `public/app.js` → http://localhost:3000/app.js
-
-## Environment Variables
-
-Copy `.env.example` to `.env` and configure as needed:
-
+### Access Database
 ```bash
-PORT=3000
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=radiocalco_dev
-DB_USER=your_username
-DB_PASSWORD=your_password
+/usr/local/opt/postgresql@17/bin/psql radiocalco_dev
 ```
 
-## Next Steps
+### Common Commands
+- `\l` - List databases
+- `\dt` - List tables
+- `\d table_name` - Describe table
+- `\q` - Quit
 
-1. Create database tables for your application
-2. Add API routes in `server.js`
-3. Create frontend files in the `public/` directory
-4. Build your prototype!
+## ⚠️ Known Limitations
+
+- **No Authentication**: User/student endpoints lack access control
+- **IP-Based Ratings**: Can be bypassed with VPN
+- **No Rate Limiting**: API endpoints unrestricted
+- **Manual Testing**: No automated test suite yet
+- **Single Instance**: No horizontal scaling support
+
+## 🚧 Roadmap
+
+- [ ] Add authentication (JWT or session-based)
+- [ ] Implement rate limiting
+- [ ] Add end-to-end tests (Playwright)
+- [ ] Add unit tests for API endpoints
+- [ ] Implement WebSocket for real-time updates
+- [ ] Add user roles and permissions
+- [ ] Docker containerization
+- [ ] CI/CD pipeline
+
+## 📄 License
+
+This is a learning/portfolio project. Feel free to explore and learn from the code.
+
+## 🤝 Contributing
+
+This is a personal learning project, but feedback and suggestions are welcome via issues.
+
+---
+
+**Built with Claude Code** - Showcasing the future of AI-assisted software development.
