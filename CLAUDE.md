@@ -45,7 +45,7 @@ brew services list
 ```
 
 ### Database Setup
-The application requires three tables. Connect to the database and run:
+The application requires four tables. Connect to the database and run:
 
 ```sql
 -- Users table
@@ -85,6 +85,19 @@ CREATE TABLE audit_log (
 
 CREATE INDEX idx_audit_log_entity ON audit_log(entity_type, entity_id);
 CREATE INDEX idx_audit_log_user ON audit_log(user_email);
+
+-- Students table
+CREATE TABLE students (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  grade VARCHAR(50) NOT NULL,
+  major VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_students_email ON students(email);
+CREATE INDEX idx_students_grade ON students(grade);
 ```
 
 ## Architecture Overview
@@ -116,7 +129,18 @@ CREATE INDEX idx_audit_log_user ON audit_log(user_email);
 - **IP-based deduplication**: Uses `req.ip` to identify users
 - **Database constraint**: UNIQUE(song_title, song_artist, user_ip)
 - **Update logic**: If user changes rating, UPDATE existing record; if same rating, return error
-- **API flow**: Check existing rating → INSERT new or UPDATE existing → return counts
+- **API flow**: Check existing rating → INSERT new or UPDATE existing → return counts and user's rating
+- **Rating persistence**: GET endpoint returns userRating field showing which button user clicked ('up', 'down', or null)
+
+### Student Management System
+- **Similar to user management**: Students have name, email, grade, and optional major fields
+- **Grade validation**: Frontend provides dropdown for Freshman, Sophomore, Junior, Senior, Graduate
+- **Email uniqueness**: Enforced at database level with UNIQUE constraint
+- **Audit logging**: All student operations (CREATE/UPDATE/DELETE) logged to audit_log table
+- **Frontend pages**:
+  - students.html - List view with sorting, search, and delete
+  - register-student.html - Registration form
+  - edit-student.html - Edit form with pre-populated data
 
 ## Environment Configuration
 
@@ -146,8 +170,15 @@ The db.js file uses these environment variables with sensible defaults.
 - `PUT /api/users/:id` - Update user (requires name, email)
 - `DELETE /api/users/:id` - Delete user
 
+### Students
+- `GET /api/students` - List all students
+- `GET /api/students/:id` - Get single student
+- `POST /api/students` - Create student (requires name, email, grade; optional major)
+- `PUT /api/students/:id` - Update student (requires name, email, grade; optional major)
+- `DELETE /api/students/:id` - Delete student
+
 ### Ratings
-- `GET /api/ratings/:title/:artist` - Get rating counts for a song
+- `GET /api/ratings/:title/:artist` - Get rating counts and user's rating for a song (returns ratings object and userRating field)
 - `POST /api/ratings` - Submit/update rating (requires title, artist, rating: "up" or "down")
 
 All endpoints return JSON with `status`, `message`, and data fields. Errors include appropriate HTTP status codes.
