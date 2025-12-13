@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/users.css">
+  <script src="/js/utils.js"></script>
 </head>
 <body>
   <!-- Navigation -->
@@ -110,31 +111,19 @@
         const data = await response.json();
 
         if (response.ok) {
-          showMessage('success', '✓ ' + data.message + ' - Redirecting to user directory...');
+          showMessage(messageDiv, 'success', '✓ ' + data.message + ' - Redirecting to user directory...', 1500);
           form.reset();
 
           setTimeout(() => {
             window.location.href = '/view-users.html';
           }, 1500);
         } else {
-          showMessage('error', '✗ ' + data.message);
+          showMessage(messageDiv, 'error', '✗ ' + data.message);
         }
       } catch (error) {
-        showMessage('error', '✗ Failed to save user. Please try again.');
+        showMessage(messageDiv, 'error', '✗ Failed to save user. Please try again.');
       }
     });
-
-    function showMessage(type, text) {
-      messageDiv.textContent = text;
-      messageDiv.className = `message ${type}`;
-      messageDiv.style.display = 'block';
-
-      if (type === 'error') {
-        setTimeout(() => {
-          messageDiv.style.display = 'none';
-        }, 5000);
-      }
-    }
   </script>
 </body>
 </html>
