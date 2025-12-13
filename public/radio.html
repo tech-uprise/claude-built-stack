@@ -182,13 +182,17 @@
 
     function togglePlayPause() {
       if (audio.paused) {
+        loadingElement.style.display = 'block';
         audio.play().then(() => {
           playPauseBtn.innerHTML = '⏸';
+          loadingElement.style.display = 'none';
           if (startTime === 0) {
             startTime = Date.now();
           }
         }).catch(error => {
           console.error('Play error:', error);
+          loadingElement.style.display = 'none';
+          alert('Failed to start playback. The stream may be offline. Error: ' + error.message);
         });
       } else {
         audio.pause();
@@ -377,6 +381,25 @@
       if (isInitialLoad) {
         isInitialLoad = false;
       }
+    });
+
+    audio.addEventListener('error', function(e) {
+      console.error('Audio error:', e);
+      loadingElement.style.display = 'none';
+      playPauseBtn.innerHTML = '▶';
+      var errorMsg = 'Playback error. ';
+      if (audio.error) {
+        errorMsg += 'Code: ' + audio.error.code;
+      }
+      alert(errorMsg + ' The stream may be offline.');
+    });
+
+    audio.addEventListener('stalled', function() {
+      console.warn('Stream stalled');
+    });
+
+    audio.addEventListener('playing', function() {
+      loadingElement.style.display = 'none';
     });
 
     // Initialize player on page load

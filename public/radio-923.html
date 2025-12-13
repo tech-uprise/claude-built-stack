@@ -29,15 +29,6 @@
     </div>
   </nav>
 
-  <!-- Page Header -->
-  <div class="page-header">
-    <div class="header-content">
-      <h1>Bolly 92.3 FM</h1>
-      <p>Bay Area's Premier Indian Radio Station</p>
-      <div class="station-tagline">🎵 Bringing You the Best of Bollywood, Bhangra & Beyond 🎵</div>
-    </div>
-  </div>
-
   <!-- Main Content -->
   <div class="container">
     <div class="audio-player">
@@ -190,15 +181,21 @@
 
     function togglePlayPause() {
       if (audio.paused) {
+        loadingElement.style.display = 'block';
         audio.play().then(() => {
           playPauseBtn.innerHTML = '⏸';
           updateStatus('Playing', '#2ecc71');
+          loadingElement.style.display = 'none';
+          trackTitle.textContent = 'Bolly 92.3 FM - Live';
+          trackArtist.textContent = 'Bay Area Indian Radio';
           if (startTime === 0) {
             startTime = Date.now();
           }
         }).catch(error => {
           console.error('Play error:', error);
           updateStatus('Play Error', '#e74c3c');
+          loadingElement.style.display = 'none';
+          alert('Failed to start playback. The stream may be offline. Error: ' + error.message);
         });
       } else {
         audio.pause();
@@ -352,8 +349,8 @@
 
     // No cleanup needed for native audio
 
-    // Show message for recently played (no metadata API available yet)
-    historyList.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px; font-weight: 500;">Track history will appear here once metadata is available</div>';
+    // Show message for recently played
+    historyList.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">Live 24/7 streaming from Bolly 92.3 FM<br><br>Track history is not available for this stream</div>';
   </script>
 </body>
 </html>
