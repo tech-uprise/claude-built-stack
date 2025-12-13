@@ -232,9 +232,15 @@ When creating or modifying frontend pages, maintain consistency with these brand
 
 ### Frontend Architecture
 - No build step required - vanilla JavaScript served statically
+- **Shared Utilities**: `/public/js/utils.js` - DRY principle with common functions
+  - `escapeHtml()` - XSS prevention
+  - `showMessage()` - Consistent notifications across pages
+  - `formatDate()`, `formatTimestamp()` - Date formatting
+  - `getFormData()`, `isValidEmail()` - Form helpers
 - HLS.js loaded from CDN for main radio player
 - All pages use fetch() API for backend communication
 - Brand colors and typography consistent across all pages
+- ~144 lines of duplicate JavaScript eliminated via refactoring
 
 ### Testing
 The application has comprehensive automated tests using Jest and Supertest. To run tests:
