@@ -247,6 +247,42 @@ body {
   background: #f8fafc;
 }
 
+/* Data Table Styles (for pages with complex tables) */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table thead {
+  background: #f1f5f9;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.data-table th {
+  padding: 16px 32px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background 0.2s;
+}
+
+.data-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.data-table td {
+  padding: 20px 32px;
+  color: #1e293b;
+  font-size: 14px;
+}
+
 /* Utility Classes */
 .text-center {
   text-align: center;
