@@ -96,11 +96,70 @@ All endpoints return JSON with `status`, `message`, and `data` fields. Errors in
 ## 🚀 Getting Started
 
 ### Prerequisites
+
+**Option 1: Docker (Recommended)**
+- Docker 20.10+
+- Docker Compose 2.0+
+
+**Option 2: Local Development**
 - Node.js v22.21.1 or later
 - PostgreSQL 17
 - npm or yarn
 
-### Installation
+### Docker Deployment (Recommended)
+
+The easiest way to run the application:
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/tech-uprise/claude-built-stack.git
+cd claude-built-stack
+```
+
+2. **Create environment file**
+```bash
+cp .env.docker.example .env
+# Edit .env if needed (defaults work for local development)
+```
+
+3. **Start with Docker Compose**
+```bash
+docker-compose up -d
+```
+
+4. **Verify deployment**
+```bash
+# Check containers are running
+docker-compose ps
+
+# View logs
+docker-compose logs -f app
+
+# Check health
+curl http://localhost:3000/api/health
+```
+
+5. **Access the application**
+- Main page: http://localhost:3000
+- API docs: http://localhost:3000/api-docs.html
+- All features ready to use!
+
+**Docker Commands:**
+```bash
+docker-compose up -d          # Start in background
+docker-compose down           # Stop and remove containers
+docker-compose logs -f app    # View app logs
+docker-compose logs -f db     # View database logs
+docker-compose restart app    # Restart application
+docker-compose exec db psql -U postgres -d radiocalco_dev  # Access database
+```
+
+**Database Persistence:**
+- Data is stored in Docker volume `radiocalco_postgres_data`
+- Survives container restarts
+- To reset: `docker-compose down -v` (⚠️ deletes all data)
+
+### Local Installation (Without Docker)
 
 1. **Clone the repository**
 ```bash
@@ -185,8 +244,13 @@ npm run dev
 claude-built-stack/
 ├── server.js              # Main Express app with all routes
 ├── db.js                  # PostgreSQL connection pool
+├── Dockerfile             # Multi-stage Docker build
+├── docker-compose.yml     # Orchestration for app + PostgreSQL
+├── .dockerignore          # Docker build exclusions
+├── init.sql               # Database initialization script
 ├── .env                   # Environment variables (not in git)
-├── .env.example           # Example environment template
+├── .env.example           # Example environment template (local)
+├── .env.docker.example    # Example environment template (Docker)
 ├── package.json           # Dependencies and scripts
 ├── CLAUDE.md              # Claude Code project instructions
 ├── __tests__/             # Automated test suites
@@ -317,6 +381,7 @@ brew services list
 - [x] Add frontend unit tests for utilities
 - [x] JavaScript code refactoring (DRY with shared utils.js)
 - [x] CSS refactoring (shared base.css)
+- [x] Docker containerization with docker-compose
 
 ### In Progress / Planned
 - [ ] Add authentication (JWT or session-based)
@@ -324,8 +389,8 @@ brew services list
 - [ ] Add end-to-end tests (Playwright/Cypress)
 - [ ] Implement WebSocket for real-time updates
 - [ ] Add user roles and permissions
-- [ ] Docker containerization
 - [ ] CI/CD pipeline with GitHub Actions
+- [ ] Kubernetes deployment manifests
 
 ## 📄 License
 

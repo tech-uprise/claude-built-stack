@@ -1,0 +1,68 @@
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:17-alpine
+    container_name: radiocalco-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-radiocalco_dev}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    networks:
+      - radiocalco-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-radiocalco_dev}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Node.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: radiocalco-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3000}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-radiocalco_dev}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "${PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - radiocalco-network
+    volumes:
+      # Mount public directory for development (optional)
+      - ./public:/app/public:ro
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+
+# Named volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+
+# Custom network for service communication
+networks:
+  radiocalco-network:
+    driver: bridge

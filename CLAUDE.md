@@ -23,6 +23,36 @@ npm run dev
 npm start
 ```
 
+### Docker (Recommended for Deployment)
+```bash
+# Start all services (app + database)
+docker-compose up -d
+
+# View logs
+docker-compose logs -f app
+docker-compose logs -f db
+
+# Stop services
+docker-compose down
+
+# Rebuild after code changes
+docker-compose up -d --build
+
+# Access database
+docker-compose exec db psql -U postgres -d radiocalco_dev
+
+# Reset database (⚠️ deletes all data)
+docker-compose down -v
+```
+
+The Docker setup includes:
+- **Multi-stage Dockerfile**: Optimized Node.js Alpine image with non-root user
+- **docker-compose.yml**: Orchestrates app and PostgreSQL 17 with health checks
+- **init.sql**: Automatic database initialization with all tables
+- **Persistent volumes**: Data survives container restarts
+- **Health checks**: Both app and database monitored
+- **Environment variables**: Configured via `.env` file
+
 ### Testing
 ```bash
 # Run all tests with coverage report
