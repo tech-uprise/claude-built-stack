@@ -471,8 +471,10 @@ app.delete('/api/students/:id', async (req, res) => {
 // Get ratings for a song
 app.get('/api/ratings/:title/:artist', async (req, res) => {
   const { title, artist } = req.params;
+  const userIp = req.ip || req.connection.remoteAddress;
 
   try {
+    // Get rating counts
     const result = await db.query(
       `SELECT
         rating_type,
@@ -492,9 +494,16 @@ app.get('/api/ratings/:title/:artist', async (req, res) => {
       ratings[row.rating_type] = parseInt(row.count);
     });
 
+    // Check if current user has rated this song
+    const userRating = await db.query(
+      'SELECT rating_type FROM song_ratings WHERE song_title = $1 AND song_artist = $2 AND user_ip = $3',
+      [decodeURIComponent(title), decodeURIComponent(artist), userIp]
+    );
+
     res.json({
       status: 'success',
-      ratings
+      ratings,
+      userRating: userRating.rows.length > 0 ? userRating.rows[0].rating_type : null
     });
   } catch (error) {
     res.status(500).json({

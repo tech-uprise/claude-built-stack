@@ -258,10 +258,19 @@
           }
 
           songRating.style.display = 'flex';
+
+          // Reset button states first
           thumbsUpBtn.classList.remove('active');
           thumbsDownBtn.classList.remove('active');
           thumbsUpBtn.disabled = false;
           thumbsDownBtn.disabled = false;
+
+          // If user has already rated, show which button they clicked
+          if (data.userRating === 'up') {
+            thumbsUpBtn.classList.add('active');
+          } else if (data.userRating === 'down') {
+            thumbsDownBtn.classList.add('active');
+          }
         }
       } catch (error) {
         console.error('Failed to load ratings:', error);
