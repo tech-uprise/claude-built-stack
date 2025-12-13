@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/view-users.css">
+  <script src="/js/utils.js"></script>
 </head>
 <body>
   <!-- Navigation -->
@@ -190,41 +191,14 @@
         const data = await response.json();
 
         if (response.ok) {
-          showMessage('success', '✓ ' + data.message);
+          showMessage(messageDiv, 'success', '✓ ' + data.message);
           loadUsers();
         } else {
-          showMessage('error', '✗ ' + data.message);
+          showMessage(messageDiv, 'error', '✗ ' + data.message);
         }
       } catch (error) {
-        showMessage('error', '✗ Failed to delete user. Please try again.');
+        showMessage(messageDiv, 'error', '✗ Failed to delete user. Please try again.');
       }
-    }
-
-    function showMessage(type, text) {
-      messageDiv.textContent = text;
-      messageDiv.className = `message ${type}`;
-      messageDiv.style.display = 'block';
-
-      setTimeout(() => {
-        messageDiv.style.display = 'none';
-      }, 5000);
-    }
-
-    function formatDate(dateString) {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
     }
   </script>
 </body>
