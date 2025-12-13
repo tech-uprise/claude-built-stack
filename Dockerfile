@@ -1,7 +1,7 @@
 # Multi-stage build for Node.js application
 
 # Stage 1: Build stage
-FROM node:22.11.1-alpine AS builder
+FROM node:22-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN npm ci --only=production && \
     npm cache clean --force
 
 # Stage 2: Production stage
-FROM node:22.11.1-alpine
+FROM node:22-alpine
 
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
