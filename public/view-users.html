@@ -28,22 +28,6 @@
     </div>
   </nav>
 
-  <!-- Page Header -->
-  <div class="page-header">
-    <div class="header-content">
-      <div>
-        <h1>User Directory</h1>
-        <p>View and manage all registered users</p>
-        <div class="breadcrumb">
-          <a href="/">Home</a> / View Users
-        </div>
-      </div>
-      <div class="header-action">
-        <div class="user-count-badge" id="userCount">LOADING...</div>
-      </div>
-    </div>
-  </div>
-
   <!-- Main Content -->
   <div class="container">
     <div class="table-container">
@@ -72,7 +56,6 @@
 
   <script>
     const tableContent = document.getElementById('tableContent');
-    const userCount = document.getElementById('userCount');
     const messageDiv = document.getElementById('message');
 
     let allUsers = [];
@@ -87,7 +70,6 @@
 
         if (response.ok) {
           allUsers = data.users;
-          userCount.textContent = `TOTAL USERS: ${data.count}`;
           renderUsers(allUsers);
         } else {
           tableContent.innerHTML = `

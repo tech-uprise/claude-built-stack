@@ -28,22 +28,6 @@
     </div>
   </nav>
 
-  <!-- Page Header -->
-  <div class="page-header">
-    <div class="header-content">
-      <div>
-        <h1>Student Registry</h1>
-        <p>View and manage all registered students</p>
-        <div class="breadcrumb">
-          <a href="/">Home</a> / Student Registry
-        </div>
-      </div>
-      <div class="header-action">
-        <div class="student-count-badge" id="studentCount">LOADING...</div>
-      </div>
-    </div>
-  </div>
-
   <!-- Main Content -->
   <div class="container">
     <div class="table-container">
@@ -72,7 +56,6 @@
 
   <script>
     const tableContent = document.getElementById('tableContent');
-    const studentCount = document.getElementById('studentCount');
     const messageDiv = document.getElementById('message');
 
     let allStudents = [];
@@ -87,7 +70,6 @@
 
         if (response.ok) {
           allStudents = data.students;
-          studentCount.textContent = `TOTAL STUDENTS: ${data.count}`;
           renderStudents(allStudents);
         } else {
           tableContent.innerHTML = `
