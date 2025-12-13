@@ -1,0 +1,245 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION || 'us-west-2' }}
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY || 'radiocalco-app' }}
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: radiocalco_dev
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Initialize database schema
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d radiocalco_dev -f init.sql
+
+      - name: Run tests
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: radiocalco_dev
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          NODE_ENV: test
+        run: npm test
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        if: always()
+        continue-on-error: true
+
+  build-and-push:
+    name: Build & Push Docker Image
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-uri: ${{ steps.build-image.outputs.image }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}
+          tags: |
+            type=sha,prefix=,format=long
+            type=raw,value=latest
+
+      - name: Build and push Docker image
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build Docker image
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+          # Push both tags to ECR
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+          # Output image URI for next job
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Image scan results
+        run: |
+          echo "Image pushed successfully!"
+          echo "Image URI: ${{ steps.build-image.outputs.image }}"
+          echo "Latest tag: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest"
+
+  deploy:
+    name: Deploy to App Runner
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy to App Runner
+        id: deploy-apprunner
+        run: |
+          # Check if App Runner service exists
+          SERVICE_ARN=$(aws apprunner list-services \
+            --query "ServiceSummaryList[?ServiceName=='radiocalco-app'].ServiceArn" \
+            --output text 2>/dev/null || echo "")
+
+          if [ -z "$SERVICE_ARN" ]; then
+            echo "⚠️ App Runner service 'radiocalco-app' not found"
+            echo "Please create the service first by following DEPLOYMENT.md Step 13"
+            echo "Once created, this workflow will automatically deploy updates"
+            exit 0
+          fi
+
+          echo "Found App Runner service: $SERVICE_ARN"
+          echo "Triggering deployment with latest image..."
+
+          # Trigger App Runner deployment
+          aws apprunner start-deployment --service-arn "$SERVICE_ARN"
+
+          echo "✅ Deployment triggered successfully!"
+          echo "Monitor deployment status in AWS Console:"
+          echo "https://console.aws.amazon.com/apprunner/home?region=${{ env.AWS_REGION }}#/services"
+
+      - name: Wait for deployment
+        if: success()
+        run: |
+          SERVICE_ARN=$(aws apprunner list-services \
+            --query "ServiceSummaryList[?ServiceName=='radiocalco-app'].ServiceArn" \
+            --output text)
+
+          if [ -z "$SERVICE_ARN" ]; then
+            echo "Service not found, skipping wait"
+            exit 0
+          fi
+
+          echo "Waiting for deployment to complete (max 10 minutes)..."
+
+          for i in {1..60}; do
+            STATUS=$(aws apprunner describe-service \
+              --service-arn "$SERVICE_ARN" \
+              --query 'Service.Status' \
+              --output text)
+
+            echo "Deployment status: $STATUS (check $i/60)"
+
+            if [ "$STATUS" = "RUNNING" ]; then
+              echo "✅ Deployment completed successfully!"
+
+              SERVICE_URL=$(aws apprunner describe-service \
+                --service-arn "$SERVICE_ARN" \
+                --query 'Service.ServiceUrl' \
+                --output text)
+
+              echo "🚀 Application is live at: https://$SERVICE_URL"
+              exit 0
+            fi
+
+            if [ "$STATUS" = "CREATE_FAILED" ] || [ "$STATUS" = "UPDATE_FAILED" ]; then
+              echo "❌ Deployment failed with status: $STATUS"
+              exit 1
+            fi
+
+            sleep 10
+          done
+
+          echo "⚠️ Deployment timeout after 10 minutes"
+          echo "Check AWS Console for current status"
+          exit 1
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** ${{ needs.build-and-push.outputs.image }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Region:** ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Service:** radiocalco-app" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          SERVICE_ARN=$(aws apprunner list-services \
+            --query "ServiceSummaryList[?ServiceName=='radiocalco-app'].ServiceArn" \
+            --output text 2>/dev/null || echo "")
+
+          if [ -n "$SERVICE_ARN" ]; then
+            SERVICE_URL=$(aws apprunner describe-service \
+              --service-arn "$SERVICE_ARN" \
+              --query 'Service.ServiceUrl' \
+              --output text 2>/dev/null || echo "unknown")
+            echo "- **URL:** https://$SERVICE_URL" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Status:** Service not yet created (follow DEPLOYMENT.md)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  notify:
+    name: Notify Results
+    needs: [test, build-and-push, deploy]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Report status
+        run: |
+          echo "## Workflow Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Tests: ${{ needs.test.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Build & Push: ${{ needs.build-and-push.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Deploy: ${{ needs.deploy.result }}" >> $GITHUB_STEP_SUMMARY
