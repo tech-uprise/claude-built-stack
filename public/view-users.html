@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Directory - RadioHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f8f9fa;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+
+    /* Navigation */
+    .navbar {
+      background: #1a365d;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-accent {
+      color: #3b82f6;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .nav-link {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      padding: 10px 20px;
+      font-weight: 500;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+
+    .nav-link:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .nav-link.active {
+      background: #3b82f6;
+      color: white;
+    }
+
+    /* Page Header */
+    .page-header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1a365d 100%);
+      color: white;
+      padding: 60px 40px;
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .page-header h1 {
+      font-size: 40px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .page-header p {
+      font-size: 16px;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .breadcrumb {
+      margin-top: 20px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .breadcrumb a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+
+    .header-action {
+      text-align: right;
+    }
+
+    .user-count-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 1400px;
+      margin: -40px auto 60px;
+      padding: 0 40px;
+    }
+
+    .table-container {
+      background: white;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+
+    .table-header {
+      background: #f8fafc;
+      border-bottom: 2px solid #e2e8f0;
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .table-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e293b;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-add {
+      background: #10b981;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-add:hover {
+      background: #059669;
+    }
+
+    .message {
+      padding: 16px 32px;
+      margin: 0;
+      border-bottom: 1px solid #e2e8f0;
+      border-left: 4px solid;
+      display: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .message.success {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #10b981;
+    }
+
+    .message.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border-color: #ef4444;
+    }
+
+    /* Data Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table thead {
+      background: #f1f5f9;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .data-table th {
+      padding: 16px 32px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .data-table th.sortable {
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      padding-right: 40px;
+    }
+
+    .data-table th.sortable:hover {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    .data-table th.sortable::after {
+      content: '⇅';
+      position: absolute;
+      right: 16px;
+      opacity: 0.3;
+      font-size: 14px;
+    }
+
+    .data-table th.sortable.asc::after {
+      content: '↑';
+      opacity: 1;
+      color: #3b82f6;
+    }
+
+    .data-table th.sortable.desc::after {
+      content: '↓';
+      opacity: 1;
+      color: #3b82f6;
+    }
+
+    .data-table tbody tr {
+      border-bottom: 1px solid #e2e8f0;
+      transition: background 0.2s;
+    }
+
+    .data-table tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .data-table td {
+      padding: 20px 32px;
+      color: #1e293b;
+      font-size: 14px;
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .user-email {
+      color: #64748b;
+    }
+
+    .user-id {
+      font-family: 'Courier New', monospace;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .user-date {
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .btn-edit {
+      background: transparent;
+      color: #3b82f6;
+      padding: 8px 16px;
+      border: 2px solid #3b82f6;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    .btn-edit:hover {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-delete {
+      background: transparent;
+      color: #ef4444;
+      padding: 8px 16px;
+      border: 2px solid #ef4444;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-delete:hover {
+      background: #ef4444;
+      color: white;
+    }
+
+    .empty-state {
+      padding: 80px 40px;
+      text-align: center;
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+
+    .empty-state h3 {
+      font-size: 20px;
+      color: #475569;
+      margin-bottom: 12px;
+    }
+
+    .empty-state p {
+      color: #94a3b8;
+      margin-bottom: 24px;
+    }
+
+    .empty-state a {
+      display: inline-block;
+      background: #1a365d;
+      color: white;
+      padding: 12px 28px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
+    }
+
+    .empty-state a:hover {
+      background: #3b82f6;
+    }
+
+    .loading {
+      padding: 60px;
+      text-align: center;
+      color: #64748b;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e2e8f0;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Footer */
+    .footer {
+      background: #1a365d;
+      color: rgba(255,255,255,0.7);
+      padding: 40px;
+      text-align: center;
+      margin-top: 80px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">RADIO<span class="logo-accent">HUB</span></div>
+      <ul class="nav-menu">
+        <li><a href="/" class="nav-link">HOME</a></li>
+        <li><a href="/radio.html" class="nav-link">RADIO STREAM</a></li>
+        <li><a href="/radio-923.html" class="nav-link">92.3 FM</a></li>
+        <li><a href="/users.html" class="nav-link">REGISTER USER</a></li>
+        <li><a href="/view-users.html" class="nav-link active">VIEW USERS</a></li>
+        <li><a href="/api-docs.html" class="nav-link">API DOCS</a></li>
+        <li><a href="/audit.html" class="nav-link">AUDIT LOG</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div>
+        <h1>User Directory</h1>
+        <p>View and manage all registered users</p>
+        <div class="breadcrumb">
+          <a href="/">Home</a> / View Users
+        </div>
+      </div>
+      <div class="header-action">
+        <div class="user-count-badge" id="userCount">LOADING...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="table-container">
+      <div class="table-header">
+        <div class="table-title">REGISTERED USERS</div>
+        <a href="/users.html" class="btn-add">+ ADD NEW USER</a>
+      </div>
+
+      <div id="message" class="message"></div>
+
+      <div id="tableContent">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <p>Loading user data...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2025 RadioHub. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    const tableContent = document.getElementById('tableContent');
+    const userCount = document.getElementById('userCount');
+    const messageDiv = document.getElementById('message');
+
+    let allUsers = [];
+    let currentSort = { column: null, direction: null };
+
+    loadUsers();
+
+    async function loadUsers() {
+      try {
+        const response = await fetch('/api/users');
+        const data = await response.json();
+
+        if (response.ok) {
+          allUsers = data.users;
+          userCount.textContent = `TOTAL USERS: ${data.count}`;
+          renderUsers(allUsers);
+        } else {
+          tableContent.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">⚠️</div>
+              <h3>Failed to Load Users</h3>
+              <p>Unable to retrieve user data. Please try again.</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        tableContent.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">⚠️</div>
+            <h3>Connection Error</h3>
+            <p>Unable to connect to the server. Please check your connection.</p>
+          </div>
+        `;
+      }
+    }
+
+    function renderUsers(users) {
+      if (users.length === 0) {
+        tableContent.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <h3>No Users Found</h3>
+            <p>The user directory is currently empty. Start by adding your first user.</p>
+            <a href="/users.html">REGISTER FIRST USER</a>
+          </div>
+        `;
+        return;
+      }
+
+      tableContent.innerHTML = `
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="sortable ${currentSort.column === 'id' ? currentSort.direction : ''}" data-sort="id">ID</th>
+              <th class="sortable ${currentSort.column === 'name' ? currentSort.direction : ''}" data-sort="name">NAME</th>
+              <th class="sortable ${currentSort.column === 'email' ? currentSort.direction : ''}" data-sort="email">EMAIL</th>
+              <th class="sortable ${currentSort.column === 'created_at' ? currentSort.direction : ''}" data-sort="created_at">REGISTERED</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${users.map(user => `
+              <tr>
+                <td class="user-id">#${user.id}</td>
+                <td class="user-name">${escapeHtml(user.name)}</td>
+                <td class="user-email">${escapeHtml(user.email)}</td>
+                <td class="user-date">${formatDate(user.created_at)}</td>
+                <td>
+                  <a href="/edit-user.html?id=${user.id}" class="btn-edit">EDIT</a>
+                  <button class="btn-delete" onclick="deleteUser(${user.id}, '${escapeHtml(user.name)}')">
+                    DELETE
+                  </button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      // Add click handlers to sortable headers
+      document.querySelectorAll('.sortable').forEach(header => {
+        header.addEventListener('click', () => {
+          const column = header.dataset.sort;
+          sortUsers(column);
+        });
+      });
+    }
+
+    function sortUsers(column) {
+      if (currentSort.column === column) {
+        // Toggle direction
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        // New column, default to ascending
+        currentSort.column = column;
+        currentSort.direction = 'asc';
+      }
+
+      const sortedUsers = [...allUsers].sort((a, b) => {
+        let aVal = a[column];
+        let bVal = b[column];
+
+        // Handle different data types
+        if (column === 'id') {
+          aVal = parseInt(aVal);
+          bVal = parseInt(bVal);
+        } else if (column === 'created_at') {
+          aVal = new Date(aVal);
+          bVal = new Date(bVal);
+        } else {
+          aVal = String(aVal).toLowerCase();
+          bVal = String(bVal).toLowerCase();
+        }
+
+        if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      renderUsers(sortedUsers);
+    }
+
+    async function deleteUser(userId, userName) {
+      if (!confirm(`Are you sure you want to delete ${userName}?\n\nThis action cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/users/${userId}`, {
+          method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage('success', '✓ ' + data.message);
+          loadUsers();
+        } else {
+          showMessage('error', '✗ ' + data.message);
+        }
+      } catch (error) {
+        showMessage('error', '✗ Failed to delete user. Please try again.');
+      }
+    }
+
+    function showMessage(type, text) {
+      messageDiv.textContent = text;
+      messageDiv.className = `message ${type}`;
+      messageDiv.style.display = 'block';
+
+      setTimeout(() => {
+        messageDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

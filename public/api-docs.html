@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Documentation - RadioHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f8f9fa;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+
+    /* Navigation */
+    .navbar {
+      background: #1a365d;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-accent {
+      color: #3b82f6;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .nav-link {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      padding: 10px 20px;
+      font-weight: 500;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+
+    .nav-link:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .nav-link.active {
+      background: #3b82f6;
+      color: white;
+    }
+
+    /* Page Header */
+    .page-header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1a365d 100%);
+      color: white;
+      padding: 60px 40px;
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .page-header h1 {
+      font-size: 40px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .page-header p {
+      font-size: 16px;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .breadcrumb {
+      margin-top: 20px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .breadcrumb a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 1400px;
+      margin: -40px auto 60px;
+      padding: 0 40px;
+    }
+
+    .api-container {
+      background: white;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .api-header {
+      background: #f8fafc;
+      border-bottom: 2px solid #e2e8f0;
+      padding: 32px 40px;
+    }
+
+    .api-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .api-subtitle {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .api-content {
+      padding: 40px;
+    }
+
+    .endpoint-section {
+      margin-bottom: 48px;
+    }
+
+    .endpoint-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .endpoint-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 24px;
+      margin-bottom: 20px;
+      transition: all 0.2s;
+    }
+
+    .endpoint-card:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 2px 8px rgba(59,130,246,0.1);
+    }
+
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .method-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: white;
+    }
+
+    .method-get {
+      background: #1a365d;
+    }
+
+    .method-post {
+      background: #10b981;
+    }
+
+    .method-delete {
+      background: #ef4444;
+    }
+
+    .endpoint-path {
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .endpoint-description {
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .endpoint-details {
+      background: white;
+      border: 1px solid #e2e8f0;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .detail-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .code-block {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      margin-top: 8px;
+    }
+
+    .response-example {
+      margin-top: 12px;
+    }
+
+    /* Footer */
+    .footer {
+      background: #1a365d;
+      color: rgba(255,255,255,0.7);
+      padding: 40px;
+      text-align: center;
+      margin-top: 80px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">RADIO<span class="logo-accent">HUB</span></div>
+      <ul class="nav-menu">
+        <li><a href="/" class="nav-link">HOME</a></li>
+        <li><a href="/radio.html" class="nav-link">RADIO STREAM</a></li>
+        <li><a href="/radio-923.html" class="nav-link">92.3 FM</a></li>
+        <li><a href="/users.html" class="nav-link">REGISTER USER</a></li>
+        <li><a href="/view-users.html" class="nav-link">VIEW USERS</a></li>
+        <li><a href="/api-docs.html" class="nav-link active">API DOCS</a></li>
+        <li><a href="/audit.html" class="nav-link">AUDIT LOG</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>API Documentation</h1>
+      <p>Complete RESTful API reference for system integration</p>
+      <div class="breadcrumb">
+        <a href="/">Home</a> / API Documentation
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="api-container">
+      <div class="api-header">
+        <div class="api-title">REST API Endpoints</div>
+        <div class="api-subtitle">Base URL: http://localhost:3000/api</div>
+      </div>
+
+      <div class="api-content">
+        <!-- System Endpoints -->
+        <div class="endpoint-section">
+          <h2 class="section-title">System Endpoints</h2>
+
+          <div class="endpoint-card">
+            <div class="endpoint-header">
+              <span class="method-badge method-get">GET</span>
+              <span class="endpoint-path">/api/health</span>
+            </div>
+            <div class="endpoint-description">
+              System health check endpoint. Returns server status and current timestamp for monitoring and uptime verification.
+            </div>
+            <div class="endpoint-details">
+              <div class="detail-label">Response Example</div>
+              <div class="code-block">
+{
+  "status": "ok",
+  "timestamp": "2025-12-10T17:50:00.000Z"
+}
+              </div>
+            </div>
+          </div>
+
+          <div class="endpoint-card">
+            <div class="endpoint-header">
+              <span class="method-badge method-get">GET</span>
+              <span class="endpoint-path">/api/test-db</span>
+            </div>
+            <div class="endpoint-description">
+              Database connection test endpoint. Verifies PostgreSQL connectivity and returns current database timestamp.
+            </div>
+            <div class="endpoint-details">
+              <div class="detail-label">Response Example</div>
+              <div class="code-block">
+{
+  "status": "success",
+  "message": "Database connection successful",
+  "data": {
+    "current_time": "2025-12-10T17:50:00.000Z"
+  }
+}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Management Endpoints -->
+        <div class="endpoint-section">
+          <h2 class="section-title">User Management</h2>
+
+          <div class="endpoint-card">
+            <div class="endpoint-header">
+              <span class="method-badge method-get">GET</span>
+              <span class="endpoint-path">/api/users</span>
+            </div>
+            <div class="endpoint-description">
+              Retrieve all registered users from the database. Returns user count and complete user list ordered by registration date.
+            </div>
+            <div class="endpoint-details">
+              <div class="detail-label">Response Example</div>
+              <div class="code-block">
+{
+  "status": "success",
+  "count": 2,
+  "users": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john@example.com",
+      "created_at": "2025-12-10T17:50:00.000Z"
+    }
+  ]
+}
+              </div>
+            </div>
+          </div>
+
+          <div class="endpoint-card">
+            <div class="endpoint-header">
+              <span class="method-badge method-post">POST</span>
+              <span class="endpoint-path">/api/users</span>
+            </div>
+            <div class="endpoint-description">
+              Create a new user record. Requires name and email in request body. Email must be unique.
+            </div>
+            <div class="endpoint-details">
+              <div class="detail-label">Request Body</div>
+              <div class="code-block">
+{
+  "name": "John Doe",
+  "email": "john@example.com"
+}
+              </div>
+              <div class="response-example">
+                <div class="detail-label">Response Example</div>
+                <div class="code-block">
+{
+  "status": "success",
+  "message": "User created successfully",
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "created_at": "2025-12-10T17:50:00.000Z"
+  }
+}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="endpoint-card">
+            <div class="endpoint-header">
+              <span class="method-badge method-delete">DELETE</span>
+              <span class="endpoint-path">/api/users/:id</span>
+            </div>
+            <div class="endpoint-description">
+              Delete a specific user by ID. Returns deleted user information upon successful deletion.
+            </div>
+            <div class="endpoint-details">
+              <div class="detail-label">URL Parameters</div>
+              <div class="code-block">
+id (integer) - User ID to delete
+              </div>
+              <div class="response-example">
+                <div class="detail-label">Response Example</div>
+                <div class="code-block">
+{
+  "status": "success",
+  "message": "User deleted successfully",
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com"
+  }
+}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2025 RadioHub. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>

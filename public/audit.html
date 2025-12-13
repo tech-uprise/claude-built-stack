@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit Log - RadioHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f8f9fa;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+
+    /* Navigation */
+    .navbar {
+      background: #1a365d;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-accent {
+      color: #3b82f6;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .nav-link {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      padding: 10px 20px;
+      font-weight: 500;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+
+    .nav-link:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .nav-link.active {
+      background: #3b82f6;
+      color: white;
+    }
+
+    /* Page Header */
+    .page-header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1a365d 100%);
+      color: white;
+      padding: 60px 40px;
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .page-header h1 {
+      font-size: 40px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .page-header p {
+      font-size: 16px;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .breadcrumb {
+      margin-top: 20px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .breadcrumb a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+
+    .header-action {
+      text-align: right;
+    }
+
+    .log-count-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 1400px;
+      margin: -40px auto 60px;
+      padding: 0 40px;
+    }
+
+    .table-container {
+      background: white;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+
+    .table-header {
+      background: #f8fafc;
+      border-bottom: 2px solid #e2e8f0;
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .table-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e293b;
+      letter-spacing: 0.3px;
+    }
+
+    .filter-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .filter-select {
+      padding: 8px 16px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    /* Data Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table thead {
+      background: #f1f5f9;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .data-table th {
+      padding: 16px 24px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .data-table th.sortable {
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      padding-right: 40px;
+    }
+
+    .data-table th.sortable:hover {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    .data-table th.sortable::after {
+      content: '⇅';
+      position: absolute;
+      right: 12px;
+      opacity: 0.3;
+      font-size: 14px;
+    }
+
+    .data-table th.sortable.asc::after {
+      content: '↑';
+      opacity: 1;
+      color: #3b82f6;
+    }
+
+    .data-table th.sortable.desc::after {
+      content: '↓';
+      opacity: 1;
+      color: #3b82f6;
+    }
+
+    .data-table tbody tr {
+      border-bottom: 1px solid #e2e8f0;
+      transition: background 0.2s;
+    }
+
+    .data-table tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .data-table td {
+      padding: 20px 24px;
+      color: #1e293b;
+      font-size: 13px;
+      vertical-align: top;
+    }
+
+    .action-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .action-badge.create {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #10b981;
+    }
+
+    .action-badge.update {
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #3b82f6;
+    }
+
+    .action-badge.delete {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #ef4444;
+    }
+
+    .entity-info {
+      font-family: 'Courier New', monospace;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .user-info {
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+
+    .user-email {
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .timestamp {
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .ip-address {
+      font-family: 'Courier New', monospace;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .changes-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 12px;
+      font-size: 12px;
+      max-width: 400px;
+    }
+
+    .change-item {
+      margin: 6px 0;
+      line-height: 1.5;
+    }
+
+    .change-label {
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .change-before {
+      color: #ef4444;
+      text-decoration: line-through;
+    }
+
+    .change-after {
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    .loading {
+      padding: 60px;
+      text-align: center;
+      color: #64748b;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e2e8f0;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      padding: 80px 40px;
+      text-align: center;
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+
+    .empty-state h3 {
+      font-size: 20px;
+      color: #475569;
+      margin-bottom: 12px;
+    }
+
+    .empty-state p {
+      color: #94a3b8;
+      margin-bottom: 24px;
+    }
+
+    /* Footer */
+    .footer {
+      background: #1a365d;
+      color: rgba(255,255,255,0.7);
+      padding: 40px;
+      text-align: center;
+      margin-top: 80px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">RADIO<span class="logo-accent">HUB</span></div>
+      <ul class="nav-menu">
+        <li><a href="/" class="nav-link">HOME</a></li>
+        <li><a href="/radio.html" class="nav-link">RADIO STREAM</a></li>
+        <li><a href="/radio-923.html" class="nav-link">92.3 FM</a></li>
+        <li><a href="/users.html" class="nav-link">REGISTER USER</a></li>
+        <li><a href="/view-users.html" class="nav-link">VIEW USERS</a></li>
+        <li><a href="/api-docs.html" class="nav-link">API DOCS</a></li>
+        <li><a href="/audit.html" class="nav-link active">AUDIT LOG</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div>
+        <h1>Audit Log</h1>
+        <p>Complete activity trail with detailed change history</p>
+        <div class="breadcrumb">
+          <a href="/">Home</a> / Audit Log
+        </div>
+      </div>
+      <div class="header-action">
+        <div class="log-count-badge" id="logCount">LOADING...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="table-container">
+      <div class="table-header">
+        <div class="table-title">ACTIVITY HISTORY</div>
+        <div class="filter-controls">
+          <select id="actionFilter" class="filter-select">
+            <option value="all">ALL ACTIONS</option>
+            <option value="CREATE">CREATE ONLY</option>
+            <option value="UPDATE">UPDATE ONLY</option>
+            <option value="DELETE">DELETE ONLY</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="tableContent">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <p>Loading audit logs...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2025 RadioHub. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    const tableContent = document.getElementById('tableContent');
+    const logCount = document.getElementById('logCount');
+    const actionFilter = document.getElementById('actionFilter');
+
+    let allLogs = [];
+    let currentSort = { column: 'created_at', direction: 'desc' };
+
+    loadAuditLogs();
+
+    actionFilter.addEventListener('change', () => {
+      renderLogs(filterLogs());
+    });
+
+    async function loadAuditLogs() {
+      try {
+        const response = await fetch('/api/audit');
+        const data = await response.json();
+
+        if (response.ok) {
+          allLogs = data.logs;
+          logCount.textContent = `TOTAL ENTRIES: ${data.count}`;
+          renderLogs(allLogs);
+        } else {
+          tableContent.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">⚠️</div>
+              <h3>Failed to Load Audit Logs</h3>
+              <p>Unable to retrieve audit data. Please try again.</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        tableContent.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">⚠️</div>
+            <h3>Connection Error</h3>
+            <p>Unable to connect to the server. Please check your connection.</p>
+          </div>
+        `;
+      }
+    }
+
+    function filterLogs() {
+      const filter = actionFilter.value;
+      if (filter === 'all') {
+        return allLogs;
+      }
+      return allLogs.filter(log => log.action === filter);
+    }
+
+    function renderLogs(logs) {
+      if (logs.length === 0) {
+        tableContent.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <h3>No Audit Logs Found</h3>
+            <p>No activity has been recorded yet.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Sort logs before rendering
+      const sortedLogs = sortLogs([...logs]);
+
+      tableContent.innerHTML = `
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="sortable ${currentSort.column === 'created_at' ? currentSort.direction : ''}" data-sort="created_at">TIMESTAMP</th>
+              <th class="sortable ${currentSort.column === 'action' ? currentSort.direction : ''}" data-sort="action">ACTION</th>
+              <th class="sortable ${currentSort.column === 'entity_id' ? currentSort.direction : ''}" data-sort="entity_id">ENTITY</th>
+              <th class="sortable ${currentSort.column === 'user_name' ? currentSort.direction : ''}" data-sort="user_name">USER</th>
+              <th>CHANGES</th>
+              <th class="sortable ${currentSort.column === 'ip_address' ? currentSort.direction : ''}" data-sort="ip_address">IP ADDRESS</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${sortedLogs.map(log => `
+              <tr>
+                <td class="timestamp">${formatTimestamp(log.created_at)}</td>
+                <td>
+                  <span class="action-badge ${log.action.toLowerCase()}">${log.action}</span>
+                </td>
+                <td class="entity-info">
+                  ${log.entity_type} #${log.entity_id}
+                </td>
+                <td>
+                  <div class="user-info">${escapeHtml(log.user_name)}</div>
+                  <div class="user-email">${escapeHtml(log.user_email)}</div>
+                </td>
+                <td>${formatChanges(log.action, log.changes)}</td>
+                <td class="ip-address">${log.ip_address || 'N/A'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      // Add click handlers to sortable headers
+      document.querySelectorAll('.sortable').forEach(header => {
+        header.addEventListener('click', () => {
+          const column = header.dataset.sort;
+          toggleSort(column);
+        });
+      });
+    }
+
+    function toggleSort(column) {
+      if (currentSort.column === column) {
+        // Toggle direction
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        // New column, default to descending for timestamp, ascending for others
+        currentSort.column = column;
+        currentSort.direction = column === 'created_at' ? 'desc' : 'asc';
+      }
+      renderLogs(filterLogs());
+    }
+
+    function sortLogs(logs) {
+      return logs.sort((a, b) => {
+        let aVal = a[currentSort.column];
+        let bVal = b[currentSort.column];
+
+        // Handle different data types
+        if (currentSort.column === 'entity_id') {
+          aVal = parseInt(aVal) || 0;
+          bVal = parseInt(bVal) || 0;
+        } else if (currentSort.column === 'created_at') {
+          aVal = new Date(aVal);
+          bVal = new Date(bVal);
+        } else {
+          aVal = String(aVal || '').toLowerCase();
+          bVal = String(bVal || '').toLowerCase();
+        }
+
+        if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    function formatChanges(action, changes) {
+      if (!changes) return '<span style="color: #94a3b8;">No data</span>';
+
+      try {
+        const changesObj = typeof changes === 'string' ? JSON.parse(changes) : changes;
+
+        if (action === 'CREATE' || action === 'DELETE') {
+          return `
+            <div class="changes-box">
+              ${Object.entries(changesObj).map(([key, value]) => `
+                <div class="change-item">
+                  <span class="change-label">${key}:</span> ${escapeHtml(String(value))}
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+
+        if (action === 'UPDATE' && changesObj.before && changesObj.after) {
+          return `
+            <div class="changes-box">
+              ${Object.keys(changesObj.before).map(key => {
+                const before = changesObj.before[key];
+                const after = changesObj.after[key];
+                if (before !== after) {
+                  return `
+                    <div class="change-item">
+                      <span class="change-label">${key}:</span><br>
+                      <span class="change-before">${escapeHtml(String(before))}</span><br>
+                      <span class="change-after">→ ${escapeHtml(String(after))}</span>
+                    </div>
+                  `;
+                }
+                return '';
+              }).join('')}
+            </div>
+          `;
+        }
+
+        return '<span style="color: #94a3b8;">No changes</span>';
+      } catch (e) {
+        return '<span style="color: #ef4444;">Invalid data</span>';
+      }
+    }
+
+    function formatTimestamp(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      let timeAgo = '';
+      if (diffMins < 1) {
+        timeAgo = 'Just now';
+      } else if (diffMins < 60) {
+        timeAgo = `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+      } else if (diffHours < 24) {
+        timeAgo = `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+      } else if (diffDays < 7) {
+        timeAgo = `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+      }
+
+      const formatted = date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
+      return timeAgo ? `${formatted}<br><small style="color: #3b82f6; font-weight: 600;">${timeAgo}</small>` : formatted;
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

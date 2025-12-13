@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Registration - RadioHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f8f9fa;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+
+    /* Navigation */
+    .navbar {
+      background: #1a365d;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-accent {
+      color: #3b82f6;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .nav-link {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      padding: 10px 20px;
+      font-weight: 500;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+
+    .nav-link:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .nav-link.active {
+      background: #3b82f6;
+      color: white;
+    }
+
+    /* Page Header */
+    .page-header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1a365d 100%);
+      color: white;
+      padding: 60px 40px;
+    }
+
+    .header-content {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .page-header h1 {
+      font-size: 40px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .page-header p {
+      font-size: 16px;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .breadcrumb {
+      margin-top: 20px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .breadcrumb a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 900px;
+      margin: -40px auto 60px;
+      padding: 0 40px;
+    }
+
+    .form-container {
+      background: white;
+      border: 1px solid #e2e8f0;
+      padding: 50px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .form-header {
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+
+    .form-header h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .form-header p {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 28px;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      color: #1e293b;
+      margin-bottom: 10px;
+      letter-spacing: 0.3px;
+    }
+
+    .form-label .required {
+      color: #ef4444;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e2e8f0;
+      background: #f8fafc;
+      font-size: 15px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      background: white;
+    }
+
+    .form-input::placeholder {
+      color: #94a3b8;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 16px;
+      margin-top: 40px;
+      padding-top: 32px;
+      border-top: 2px solid #e2e8f0;
+    }
+
+    .btn {
+      padding: 14px 32px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border: 2px solid;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: #1a365d;
+      color: white;
+      border-color: #1a365d;
+    }
+
+    .btn-primary:hover {
+      background: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #1a365d;
+      border-color: #e2e8f0;
+    }
+
+    .btn-secondary:hover {
+      background: #f8fafc;
+      border-color: #1a365d;
+    }
+
+    .message {
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      border-left: 4px solid;
+      display: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .message.success {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #10b981;
+    }
+
+    .message.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border-color: #ef4444;
+    }
+
+    .info-panel {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      padding: 20px 24px;
+      margin-top: 32px;
+    }
+
+    .info-panel p {
+      color: #475569;
+      font-size: 14px;
+    }
+
+    .info-panel a {
+      color: #1a365d;
+      font-weight: 600;
+      text-decoration: none;
+      border-bottom: 2px solid #3b82f6;
+    }
+
+    .info-panel a:hover {
+      color: #3b82f6;
+    }
+
+    /* Footer */
+    .footer {
+      background: #1a365d;
+      color: rgba(255,255,255,0.7);
+      padding: 40px;
+      text-align: center;
+      margin-top: 80px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">RADIO<span class="logo-accent">HUB</span></div>
+      <ul class="nav-menu">
+        <li><a href="/" class="nav-link">HOME</a></li>
+        <li><a href="/radio.html" class="nav-link">RADIO STREAM</a></li>
+        <li><a href="/radio-923.html" class="nav-link">92.3 FM</a></li>
+        <li><a href="/users.html" class="nav-link active">REGISTER USER</a></li>
+        <li><a href="/view-users.html" class="nav-link">VIEW USERS</a></li>
+        <li><a href="/api-docs.html" class="nav-link">API DOCS</a></li>
+        <li><a href="/audit.html" class="nav-link">AUDIT LOG</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>User Registration</h1>
+      <p>Add new users to the database with validated information</p>
+      <div class="breadcrumb">
+        <a href="/">Home</a> / Register User
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="form-container">
+      <div class="form-header">
+        <h2>New User Information</h2>
+        <p>Please provide the required information below. All fields marked with an asterisk (*) are mandatory.</p>
+      </div>
+
+      <div id="message" class="message"></div>
+
+      <form id="userForm">
+        <div class="form-group">
+          <label class="form-label">
+            FULL NAME <span class="required">*</span>
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            class="form-input"
+            required
+            placeholder="Enter full name"
+            autocomplete="name"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            EMAIL ADDRESS <span class="required">*</span>
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            required
+            placeholder="name@company.com"
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">SUBMIT REGISTRATION</button>
+          <button type="reset" class="btn btn-secondary">CLEAR FORM</button>
+        </div>
+      </form>
+
+      <div class="info-panel">
+        <p>💡 After successful registration, you can <a href="/view-users.html">view all registered users</a> in the user directory.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2025 RadioHub. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    const form = document.getElementById('userForm');
+    const messageDiv = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+
+      try {
+        const response = await fetch('/api/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, email })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage('success', '✓ ' + data.message + ' - Redirecting to user directory...');
+          form.reset();
+
+          setTimeout(() => {
+            window.location.href = '/view-users.html';
+          }, 1500);
+        } else {
+          showMessage('error', '✗ ' + data.message);
+        }
+      } catch (error) {
+        showMessage('error', '✗ Failed to save user. Please try again.');
+      }
+    });
+
+    function showMessage(type, text) {
+      messageDiv.textContent = text;
+      messageDiv.className = `message ${type}`;
+      messageDiv.style.display = 'block';
+
+      if (type === 'error') {
+        setTimeout(() => {
+          messageDiv.style.display = 'none';
+        }, 5000);
+      }
+    }
+  </script>
+</body>
+</html>

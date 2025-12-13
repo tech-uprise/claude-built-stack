@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RadioHub - Radio Streaming Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f8f9fa;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+
+    /* Navigation */
+    .navbar {
+      background: #1a365d;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-accent {
+      color: #3b82f6;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .nav-link {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      padding: 10px 20px;
+      font-weight: 500;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+
+    .nav-link:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .nav-link.active {
+      background: #3b82f6;
+      color: white;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1a365d 100%);
+      color: white;
+      padding: 100px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50%;
+      height: 100%;
+      background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"%3E%3Cdefs%3E%3Cpattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"%3E%3Cpath d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/%3E%3C/pattern%3E%3C/defs%3E%3Crect width="100%25" height="100%25" fill="url(%23grid)"/%3E%3C/svg%3E');
+      opacity: 0.3;
+    }
+
+    .hero-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 56px;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      letter-spacing: -1.5px;
+    }
+
+    .hero-subtitle {
+      font-size: 20px;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 16px;
+      font-weight: 400;
+    }
+
+    .hero-badges {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-icon {
+      font-size: 20px;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 32px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.7); }
+      50% { opacity: 0.7; box-shadow: 0 0 0 8px rgba(16,185,129,0); }
+    }
+
+    /* Dashboard Section */
+    .dashboard {
+      max-width: 1400px;
+      margin: -60px auto 60px;
+      padding: 0 40px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .dashboard-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      padding: 32px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dashboard-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+    }
+
+    .dashboard-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .card-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 12px;
+    }
+
+    .card-description {
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .card-action {
+      display: inline-block;
+      color: #1a365d;
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      border-bottom: 2px solid #3b82f6;
+      transition: all 0.2s;
+    }
+
+    .card-action:hover {
+      color: #3b82f6;
+      transform: translateX(4px);
+    }
+
+    /* Feature Highlights */
+    .features {
+      background: white;
+      border: 1px solid #e2e8f0;
+      padding: 48px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      margin-bottom: 40px;
+    }
+
+    .features-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .features-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 12px;
+    }
+
+    .features-subtitle {
+      color: #64748b;
+      font-size: 16px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+    }
+
+    .feature-item {
+      display: flex;
+      gap: 20px;
+      padding: 24px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      transition: all 0.2s;
+    }
+
+    .feature-item:hover {
+      background: white;
+      border-color: #3b82f6;
+    }
+
+    .feature-icon {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #1a365d, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .feature-content h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .feature-content p {
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Quick Stats */
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .stat-box {
+      background: white;
+      border: 1px solid #e2e8f0;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1a365d;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Footer */
+    .footer {
+      background: #1a365d;
+      color: rgba(255,255,255,0.7);
+      padding: 40px;
+      text-align: center;
+      margin-top: 80px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">RADIO<span class="logo-accent">HUB</span></div>
+      <ul class="nav-menu">
+        <li><a href="/" class="nav-link active">HOME</a></li>
+        <li><a href="/radio.html" class="nav-link">RADIO STREAM</a></li>
+        <li><a href="/radio-923.html" class="nav-link">92.3 FM</a></li>
+        <li><a href="/users.html" class="nav-link">REGISTER USER</a></li>
+        <li><a href="/view-users.html" class="nav-link">VIEW USERS</a></li>
+        <li><a href="/api-docs.html" class="nav-link">API DOCS</a></li>
+        <li><a href="/audit.html" class="nav-link">AUDIT LOG</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-container">
+      <h1>Enterprise User Management Platform</h1>
+      <div class="hero-subtitle">Powerful, scalable infrastructure for modern applications</div>
+      <div class="status-indicator">
+        <span class="status-dot"></span>
+        <span style="font-weight: 600; font-size: 14px;">ALL SYSTEMS OPERATIONAL</span>
+      </div>
+      <div class="hero-badges">
+        <div class="badge">
+          <span class="badge-icon">⚡</span>
+          <span>Express.js (Node.js v22)</span>
+        </div>
+        <div class="badge">
+          <span class="badge-icon">🗄️</span>
+          <span>PostgreSQL 17</span>
+        </div>
+        <div class="badge">
+          <span class="badge-icon">🔒</span>
+          <span>RESTful API</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard -->
+  <div class="dashboard">
+    <div class="dashboard-grid">
+      <div class="dashboard-card">
+        <div class="card-icon">👤</div>
+        <div class="card-title">User Registration</div>
+        <div class="card-description">
+          Quickly add new users with validated email addresses and automated database integration
+        </div>
+        <a href="/users.html" class="card-action">REGISTER NOW →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📊</div>
+        <div class="card-title">User Directory</div>
+        <div class="card-description">
+          Browse, search, and manage your complete user database with real-time updates
+        </div>
+        <a href="/view-users.html" class="card-action">VIEW DIRECTORY →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📡</div>
+        <div class="card-title">API Integration</div>
+        <div class="card-description">
+          Complete RESTful API documentation for seamless system integration
+        </div>
+        <a href="/api-docs.html" class="card-action">VIEW API DOCS →</a>
+      </div>
+    </div>
+
+    <!-- Feature Highlights -->
+    <div class="features">
+      <div class="features-header">
+        <div class="features-title">Platform Capabilities</div>
+        <div class="features-subtitle">Enterprise-grade features for mission-critical applications</div>
+      </div>
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-icon">🚀</div>
+          <div class="feature-content">
+            <h3>High Performance</h3>
+            <p>Built on Express.js with optimized database queries for lightning-fast response times</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔐</div>
+          <div class="feature-content">
+            <h3>Data Security</h3>
+            <p>PostgreSQL backend with parameterized queries preventing SQL injection attacks</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📈</div>
+          <div class="feature-content">
+            <h3>Scalable Architecture</h3>
+            <p>Designed to handle growth from prototype to production-scale deployments</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">⚙️</div>
+          <div class="feature-content">
+            <h3>RESTful API</h3>
+            <p>Complete API suite for CRUD operations with JSON responses and error handling</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+      <div class="stat-box">
+        <div class="stat-number">5</div>
+        <div class="stat-label">API Endpoints</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">Uptime</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">v17</div>
+        <div class="stat-label">PostgreSQL</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">v22</div>
+        <div class="stat-label">Node.js</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2025 RadioHub. All rights reserved.</p>
+      <p style="margin-top: 10px; font-size: 14px;">Powered by Express.js & PostgreSQL</p>
+    </div>
+  </footer>
+</body>
+</html>
