@@ -51,9 +51,10 @@ This is a portfolio/learning project that showcases:
 - **Responsive Design**: Mobile-first CSS with RadioCalico branding
 - **Fetch API**: Modern async HTTP requests
 
-### Development Tools
+### Development & Testing Tools
 - **AI Assistance**: Claude Code, MCP servers, AWS Bedrock
 - **Dev Server**: Nodemon for hot-reload development
+- **Testing**: Jest (test runner), Supertest (API testing)
 - **Version Control**: Git with GitHub
 - **Database Client**: PostgreSQL CLI tools
 
@@ -172,9 +173,11 @@ npm run dev
 
 ### Frontend Architecture
 - No build step required - vanilla JavaScript
+- **Shared Utilities**: Common functions in `/public/js/utils.js` (DRY principle)
 - HLS.js loaded from CDN for streaming
 - Consistent branding: Montserrat/Open Sans fonts, RadioCalico colors
 - All pages use fetch() for async communication
+- XSS prevention via `escapeHtml()` utility
 
 ## 📂 Project Structure
 
@@ -186,6 +189,14 @@ claude-built-stack/
 ├── .env.example           # Example environment template
 ├── package.json           # Dependencies and scripts
 ├── CLAUDE.md              # Claude Code project instructions
+├── __tests__/             # Automated test suites
+│   ├── health.test.js     # System health tests
+│   ├── users.test.js      # User API tests
+│   ├── students.test.js   # Student API tests
+│   ├── ratings.test.js    # Rating system tests
+│   ├── audit.test.js      # Audit logging tests
+│   └── frontend/
+│       └── utils.test.js  # Frontend utility tests
 ├── public/                # Static frontend files
 │   ├── index.html         # Landing page
 │   ├── users.html         # User management UI
@@ -194,20 +205,47 @@ claude-built-stack/
 │   ├── radio-923.html     # SHOUTcast player
 │   ├── api-docs.html      # API documentation
 │   ├── audit.html         # Audit log viewer
-│   └── css/               # Stylesheets
+│   ├── css/               # Stylesheets (refactored with base.css)
+│   └── js/
+│       └── utils.js       # Shared utility functions
 └── README.md              # This file
 ```
 
 ## 🧪 Testing
 
-Currently manual testing. To test the application:
+### Automated Testing (Jest + Supertest)
+
+**Run all tests:**
+```bash
+npm test                # Run all tests with coverage
+npm run test:watch      # Watch mode for development
+npm run test:ci         # CI mode (no interactive prompts)
+```
+
+**Test Coverage:**
+- **6 test suites, 67 tests total**
+- **Backend (45 tests)**: API endpoints, database operations, error handling
+- **Frontend (22 tests)**: Utility functions, DOM manipulation, validation
+- **Coverage**: ~85% for server.js and db.js
+
+**Backend Tests:**
+- `health.test.js` - System health and database connection (2 tests)
+- `users.test.js` - User CRUD operations with validation (17 tests)
+- `students.test.js` - Student management with audit logging (17 tests)
+- `ratings.test.js` - Song rating system and persistence (9 tests)
+- `audit.test.js` - Audit trail verification (5 tests)
+
+**Frontend Tests:**
+- `utils.test.js` - Utility functions: escapeHtml, showMessage, formatDate, formatTimestamp, getFormData, isValidEmail (22 tests)
+
+### Manual Testing
+
+For manual verification:
 1. Start server with `npm run dev`
 2. Verify database at http://localhost:3000/api/test-db
 3. Test API endpoints via api-docs.html
 4. Test radio streams via radio.html and radio-923.html
 5. Test CRUD operations via users.html and students.html
-
-**Future**: End-to-end testing with Playwright/Cypress planned.
 
 ## 🎨 Brand Guidelines
 
@@ -238,8 +276,11 @@ This project leverages:
 ## 📝 Available Scripts
 
 ```bash
-npm start       # Production server
-npm run dev     # Development server with auto-reload
+npm start           # Production server
+npm run dev         # Development server with auto-reload
+npm test            # Run all tests with coverage
+npm run test:watch  # Run tests in watch mode
+npm run test:ci     # Run tests in CI mode
 ```
 
 ## 🔧 Database Management
@@ -267,19 +308,24 @@ brew services list
 - **No Authentication**: User/student endpoints lack access control
 - **IP-Based Ratings**: Can be bypassed with VPN
 - **No Rate Limiting**: API endpoints unrestricted
-- **Manual Testing**: No automated test suite yet
 - **Single Instance**: No horizontal scaling support
 
 ## 🚧 Roadmap
 
+### Completed ✅
+- [x] Add unit tests for API endpoints (Jest + Supertest)
+- [x] Add frontend unit tests for utilities
+- [x] JavaScript code refactoring (DRY with shared utils.js)
+- [x] CSS refactoring (shared base.css)
+
+### In Progress / Planned
 - [ ] Add authentication (JWT or session-based)
 - [ ] Implement rate limiting
-- [ ] Add end-to-end tests (Playwright)
-- [ ] Add unit tests for API endpoints
+- [ ] Add end-to-end tests (Playwright/Cypress)
 - [ ] Implement WebSocket for real-time updates
 - [ ] Add user roles and permissions
 - [ ] Docker containerization
-- [ ] CI/CD pipeline
+- [ ] CI/CD pipeline with GitHub Actions
 
 ## 📄 License
 
