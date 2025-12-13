@@ -579,8 +579,13 @@ app.post('/api/ratings', async (req, res) => {
   }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-  console.log(`Database: ${process.env.DB_NAME}`);
-});
+// Start server (only if not being imported for testing)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Database: ${process.env.DB_NAME}`);
+  });
+}
+
+// Export app for testing
+module.exports = app;
