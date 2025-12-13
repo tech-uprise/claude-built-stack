@@ -1,17 +1,10 @@
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+/* 92.3 FM Page Styles */
 
+    /* Custom page background */
     body {
-      font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #ff6b35 0%, #f7931e 25%, #ffc425 75%, #ff6b35 100%);
       background-size: 200% 200%;
       animation: gradient-shift 15s ease infinite;
-      min-height: 100vh;
-      color: #1e293b;
-      line-height: 1.6;
     }
 
     @keyframes gradient-shift {
@@ -19,70 +12,9 @@
       50% { background-position: 100% 50%; }
     }
 
-    /* Navigation */
-    .navbar {
-      background: linear-gradient(135deg, #d35400 0%, #e67e22 100%);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-
-    .nav-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 70px;
-    }
-
-    .logo {
-      font-size: 28px;
-      font-weight: 800;
-      color: white;
-      letter-spacing: -0.5px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .logo-accent {
-      color: #fff3cd;
-      font-size: 32px;
-    }
-
-    .nav-menu {
-      display: flex;
-      gap: 8px;
-      list-style: none;
-    }
-
-    .nav-link {
-      color: rgba(255,255,255,0.9);
-      text-decoration: none;
-      padding: 10px 20px;
-      font-weight: 600;
-      font-size: 14px;
-      letter-spacing: 0.3px;
-      transition: all 0.2s;
-      border-radius: 6px;
-    }
-
-    .nav-link:hover {
-      background: rgba(255,255,255,0.2);
-      color: white;
-    }
-
-    .nav-link.active {
-      background: white;
-      color: #d35400;
-    }
-
-    /* Page Header */
+    /* Custom Page Header for 92.3 FM */
     .page-header {
       background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
-      color: white;
-      padding: 60px 40px;
       position: relative;
       overflow: hidden;
     }
@@ -102,19 +34,9 @@
       50% { transform: translateY(-20px) rotate(10deg); }
     }
 
-    .header-content {
-      max-width: 900px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-      text-align: center;
-    }
-
     .page-header h1 {
       font-size: 56px;
       font-weight: 800;
-      margin-bottom: 12px;
-      letter-spacing: -1px;
       text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
     }
 
