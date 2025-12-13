@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Directory - RadioHub</title>
+  <title>Student Registry - RadioHub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/base.css">
-  <link rel="stylesheet" href="/css/view-users.css">
+  <link rel="stylesheet" href="/css/students.css">
 </head>
 <body>
   <!-- Navigation -->
@@ -20,8 +20,8 @@
         <li><a href="/radio.html" class="nav-link">RADIO STREAM</a></li>
         <li><a href="/radio-923.html" class="nav-link">92.3 FM</a></li>
         <li><a href="/users.html" class="nav-link">REGISTER USER</a></li>
-        <li><a href="/view-users.html" class="nav-link active">VIEW USERS</a></li>
-        <li><a href="/students.html" class="nav-link">STUDENT REGISTRY</a></li>
+        <li><a href="/view-users.html" class="nav-link">VIEW USERS</a></li>
+        <li><a href="/students.html" class="nav-link active">STUDENT REGISTRY</a></li>
         <li><a href="/api-docs.html" class="nav-link">API DOCS</a></li>
         <li><a href="/audit.html" class="nav-link">AUDIT LOG</a></li>
       </ul>
@@ -32,14 +32,14 @@
   <div class="page-header">
     <div class="header-content">
       <div>
-        <h1>User Directory</h1>
-        <p>View and manage all registered users</p>
+        <h1>Student Registry</h1>
+        <p>View and manage all registered students</p>
         <div class="breadcrumb">
-          <a href="/">Home</a> / View Users
+          <a href="/">Home</a> / Student Registry
         </div>
       </div>
       <div class="header-action">
-        <div class="user-count-badge" id="userCount">LOADING...</div>
+        <div class="student-count-badge" id="studentCount">LOADING...</div>
       </div>
     </div>
   </div>
@@ -48,8 +48,8 @@
   <div class="container">
     <div class="table-container">
       <div class="table-header">
-        <div class="table-title">REGISTERED USERS</div>
-        <a href="/users.html" class="btn-add">+ ADD NEW USER</a>
+        <div class="table-title">REGISTERED STUDENTS</div>
+        <a href="/register-student.html" class="btn-add">+ ADD NEW STUDENT</a>
       </div>
 
       <div id="message" class="message"></div>
@@ -57,7 +57,7 @@
       <div id="tableContent">
         <div class="loading">
           <div class="loading-spinner"></div>
-          <p>Loading user data...</p>
+          <p>Loading student data...</p>
         </div>
       </div>
     </div>
@@ -72,29 +72,29 @@
 
   <script>
     const tableContent = document.getElementById('tableContent');
-    const userCount = document.getElementById('userCount');
+    const studentCount = document.getElementById('studentCount');
     const messageDiv = document.getElementById('message');
 
-    let allUsers = [];
+    let allStudents = [];
     let currentSort = { column: null, direction: null };
 
-    loadUsers();
+    loadStudents();
 
-    async function loadUsers() {
+    async function loadStudents() {
       try {
-        const response = await fetch('/api/users');
+        const response = await fetch('/api/students');
         const data = await response.json();
 
         if (response.ok) {
-          allUsers = data.users;
-          userCount.textContent = `TOTAL USERS: ${data.count}`;
-          renderUsers(allUsers);
+          allStudents = data.students;
+          studentCount.textContent = `TOTAL STUDENTS: ${data.count}`;
+          renderStudents(allStudents);
         } else {
           tableContent.innerHTML = `
             <div class="empty-state">
               <div class="empty-state-icon">⚠️</div>
-              <h3>Failed to Load Users</h3>
-              <p>Unable to retrieve user data. Please try again.</p>
+              <h3>Failed to Load Students</h3>
+              <p>Unable to retrieve student data. Please try again.</p>
             </div>
           `;
         }
@@ -109,14 +109,14 @@
       }
     }
 
-    function renderUsers(users) {
-      if (users.length === 0) {
+    function renderStudents(students) {
+      if (students.length === 0) {
         tableContent.innerHTML = `
           <div class="empty-state">
-            <div class="empty-state-icon">📋</div>
-            <h3>No Users Found</h3>
-            <p>The user directory is currently empty. Start by adding your first user.</p>
-            <a href="/users.html">REGISTER FIRST USER</a>
+            <div class="empty-state-icon">🎓</div>
+            <h3>No Students Found</h3>
+            <p>The student registry is currently empty. Start by adding your first student.</p>
+            <a href="/register-student.html">REGISTER FIRST STUDENT</a>
           </div>
         `;
         return;
@@ -129,20 +129,24 @@
               <th class="sortable ${currentSort.column === 'id' ? currentSort.direction : ''}" data-sort="id">ID</th>
               <th class="sortable ${currentSort.column === 'name' ? currentSort.direction : ''}" data-sort="name">NAME</th>
               <th class="sortable ${currentSort.column === 'email' ? currentSort.direction : ''}" data-sort="email">EMAIL</th>
+              <th class="sortable ${currentSort.column === 'grade' ? currentSort.direction : ''}" data-sort="grade">GRADE</th>
+              <th class="sortable ${currentSort.column === 'major' ? currentSort.direction : ''}" data-sort="major">MAJOR</th>
               <th class="sortable ${currentSort.column === 'created_at' ? currentSort.direction : ''}" data-sort="created_at">REGISTERED</th>
               <th>ACTIONS</th>
             </tr>
           </thead>
           <tbody>
-            ${users.map(user => `
+            ${students.map(student => `
               <tr>
-                <td class="user-id">#${user.id}</td>
-                <td class="user-name">${escapeHtml(user.name)}</td>
-                <td class="user-email">${escapeHtml(user.email)}</td>
-                <td class="user-date">${formatDate(user.created_at)}</td>
+                <td class="student-id">#${student.id}</td>
+                <td class="student-name">${escapeHtml(student.name)}</td>
+                <td class="student-email">${escapeHtml(student.email)}</td>
+                <td class="student-grade">${escapeHtml(student.grade || 'N/A')}</td>
+                <td class="student-major">${escapeHtml(student.major || 'N/A')}</td>
+                <td class="student-date">${formatDate(student.created_at)}</td>
                 <td>
-                  <a href="/edit-user.html?id=${user.id}" class="btn-edit">EDIT</a>
-                  <button class="btn-delete" onclick="deleteUser(${user.id}, '${escapeHtml(user.name)}')">
+                  <a href="/edit-student.html?id=${student.id}" class="btn-edit">EDIT</a>
+                  <button class="btn-delete" onclick="deleteStudent(${student.id}, '${escapeHtml(student.name)}')">
                     DELETE
                   </button>
                 </td>
@@ -156,12 +160,12 @@
       document.querySelectorAll('.sortable').forEach(header => {
         header.addEventListener('click', () => {
           const column = header.dataset.sort;
-          sortUsers(column);
+          sortStudents(column);
         });
       });
     }
 
-    function sortUsers(column) {
+    function sortStudents(column) {
       if (currentSort.column === column) {
         // Toggle direction
         currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
@@ -171,7 +175,7 @@
         currentSort.direction = 'asc';
       }
 
-      const sortedUsers = [...allUsers].sort((a, b) => {
+      const sortedStudents = [...allStudents].sort((a, b) => {
         let aVal = a[column];
         let bVal = b[column];
 
@@ -183,8 +187,8 @@
           aVal = new Date(aVal);
           bVal = new Date(bVal);
         } else {
-          aVal = String(aVal).toLowerCase();
-          bVal = String(bVal).toLowerCase();
+          aVal = String(aVal || '').toLowerCase();
+          bVal = String(bVal || '').toLowerCase();
         }
 
         if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
@@ -192,16 +196,16 @@
         return 0;
       });
 
-      renderUsers(sortedUsers);
+      renderStudents(sortedStudents);
     }
 
-    async function deleteUser(userId, userName) {
-      if (!confirm(`Are you sure you want to delete ${userName}?\n\nThis action cannot be undone.`)) {
+    async function deleteStudent(studentId, studentName) {
+      if (!confirm(`Are you sure you want to delete ${studentName}?\n\nThis action cannot be undone.`)) {
         return;
       }
 
       try {
-        const response = await fetch(`/api/users/${userId}`, {
+        const response = await fetch(`/api/students/${studentId}`, {
           method: 'DELETE'
         });
 
@@ -209,12 +213,12 @@
 
         if (response.ok) {
           showMessage('success', '✓ ' + data.message);
-          loadUsers();
+          loadStudents();
         } else {
           showMessage('error', '✗ ' + data.message);
         }
       } catch (error) {
-        showMessage('error', '✗ Failed to delete user. Please try again.');
+        showMessage('error', '✗ Failed to delete student. Please try again.');
       }
     }
 

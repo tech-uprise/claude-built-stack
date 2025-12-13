@@ -266,6 +266,208 @@ app.get('/api/users/:id', async (req, res) => {
   }
 });
 
+// ==================== STUDENT ENDPOINTS ====================
+
+// Get all students
+app.get('/api/students', async (req, res) => {
+  try {
+    const result = await db.query('SELECT id, name, email, grade, major, created_at FROM students ORDER BY created_at DESC');
+    res.json({
+      status: 'success',
+      count: result.rows.length,
+      students: result.rows
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch students',
+      error: error.message
+    });
+  }
+});
+
+// Get single student by ID
+app.get('/api/students/:id', async (req, res) => {
+  const studentId = parseInt(req.params.id);
+
+  if (isNaN(studentId)) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Invalid student ID'
+    });
+  }
+
+  try {
+    const result = await db.query('SELECT id, name, email, grade, major, created_at FROM students WHERE id = $1', [studentId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Student not found'
+      });
+    }
+
+    res.json({
+      status: 'success',
+      student: result.rows[0]
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch student',
+      error: error.message
+    });
+  }
+});
+
+// Create a new student
+app.post('/api/students', async (req, res) => {
+  const { name, email, grade, major } = req.body;
+
+  if (!name || !email || !grade) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Name, email, and grade are required'
+    });
+  }
+
+  try {
+    const result = await db.query(
+      'INSERT INTO students (name, email, grade, major) VALUES ($1, $2, $3, $4) RETURNING id, name, email, grade, major, created_at',
+      [name, email, grade, major || null]
+    );
+
+    // Log audit event
+    await logAudit('CREATE', 'student', result.rows[0].id, name, email, { name, email, grade, major }, req);
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Student registered successfully',
+      student: result.rows[0]
+    });
+  } catch (error) {
+    if (error.code === '23505') {
+      res.status(409).json({
+        status: 'error',
+        message: 'Email already exists'
+      });
+    } else {
+      res.status(500).json({
+        status: 'error',
+        message: 'Failed to register student',
+        error: error.message
+      });
+    }
+  }
+});
+
+// Update a student
+app.put('/api/students/:id', async (req, res) => {
+  const studentId = parseInt(req.params.id);
+  const { name, email, grade, major } = req.body;
+
+  if (isNaN(studentId)) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Invalid student ID'
+    });
+  }
+
+  if (!name || !email || !grade) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Name, email, and grade are required'
+    });
+  }
+
+  try {
+    // Get old student data for audit log
+    const oldData = await db.query('SELECT * FROM students WHERE id = $1', [studentId]);
+
+    if (oldData.rows.length === 0) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Student not found'
+      });
+    }
+
+    const result = await db.query(
+      'UPDATE students SET name = $1, email = $2, grade = $3, major = $4 WHERE id = $5 RETURNING id, name, email, grade, major, created_at',
+      [name, email, grade, major || null, studentId]
+    );
+
+    // Log audit event with before/after changes
+    const changes = {
+      before: { name: oldData.rows[0].name, email: oldData.rows[0].email, grade: oldData.rows[0].grade, major: oldData.rows[0].major },
+      after: { name, email, grade, major }
+    };
+    await logAudit('UPDATE', 'student', studentId, name, email, changes, req);
+
+    res.json({
+      status: 'success',
+      message: 'Student updated successfully',
+      student: result.rows[0]
+    });
+  } catch (error) {
+    if (error.code === '23505') {
+      res.status(409).json({
+        status: 'error',
+        message: 'Email already exists'
+      });
+    } else {
+      res.status(500).json({
+        status: 'error',
+        message: 'Failed to update student',
+        error: error.message
+      });
+    }
+  }
+});
+
+// Delete a student
+app.delete('/api/students/:id', async (req, res) => {
+  const studentId = parseInt(req.params.id);
+
+  if (isNaN(studentId)) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Invalid student ID'
+    });
+  }
+
+  try {
+    const result = await db.query(
+      'DELETE FROM students WHERE id = $1 RETURNING id, name, email, grade, major',
+      [studentId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Student not found'
+      });
+    }
+
+    // Log audit event
+    const deletedStudent = result.rows[0];
+    await logAudit('DELETE', 'student', studentId, deletedStudent.name, deletedStudent.email, { name: deletedStudent.name, email: deletedStudent.email, grade: deletedStudent.grade, major: deletedStudent.major }, req);
+
+    res.json({
+      status: 'success',
+      message: 'Student deleted successfully',
+      student: result.rows[0]
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to delete student',
+      error: error.message
+    });
+  }
+});
+
+// ==================== RATING ENDPOINTS ====================
+
 // Get ratings for a song
 app.get('/api/ratings/:title/:artist', async (req, res) => {
   const { title, artist } = req.params;

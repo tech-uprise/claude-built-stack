@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edit User - RadioHub</title>
+  <title>Edit Student - RadioHub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/base.css">
-  <link rel="stylesheet" href="/css/edit-user.css">
+  <link rel="stylesheet" href="/css/edit-student.css">
 </head>
 <body>
   <nav class="navbar">
@@ -16,6 +16,8 @@
       <div class="logo">RADIO<span class="logo-accent">HUB</span></div>
       <ul class="nav-menu">
         <li><a href="/" class="nav-link">HOME</a></li>
+        <li><a href="/radio.html" class="nav-link">RADIO STREAM</a></li>
+        <li><a href="/radio-923.html" class="nav-link">92.3 FM</a></li>
         <li><a href="/users.html" class="nav-link">REGISTER USER</a></li>
         <li><a href="/view-users.html" class="nav-link">VIEW USERS</a></li>
         <li><a href="/students.html" class="nav-link">STUDENT REGISTRY</a></li>
@@ -27,10 +29,10 @@
 
   <div class="page-header">
     <div class="header-content">
-      <h1>Edit User</h1>
-      <p>Update user information and maintain accurate records</p>
+      <h1>Edit Student</h1>
+      <p>Update student information and maintain accurate records</p>
       <div class="breadcrumb">
-        <a href="/">Home</a> / <a href="/view-users.html">View Users</a> / Edit User
+        <a href="/">Home</a> / <a href="/students.html">Student Registry</a> / Edit Student
       </div>
     </div>
   </div>
@@ -38,15 +40,15 @@
   <div class="container">
     <div class="form-container">
       <div class="form-header">
-        <h2>Update User Information</h2>
-        <p>Modify the user details below. All changes will be logged in the audit trail.</p>
+        <h2>Update Student Information</h2>
+        <p>Modify the student details below. All changes will be logged in the audit trail.</p>
       </div>
 
       <div id="message" class="message"></div>
       <div id="formContent">
         <div class="loading">
           <div class="loading-spinner"></div>
-          <p>Loading user data...</p>
+          <p>Loading student data...</p>
         </div>
       </div>
     </div>
@@ -62,17 +64,17 @@
     const formContent = document.getElementById('formContent');
     const messageDiv = document.getElementById('message');
     const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get('id');
+    const studentId = urlParams.get('id');
 
-    if (!userId) {
-      formContent.innerHTML = '<p style="text-align:center;color:#ef4444;">No user ID provided</p>';
+    if (!studentId) {
+      formContent.innerHTML = '<p style="text-align:center;color:#ef4444;">No student ID provided</p>';
     } else {
-      loadUser();
+      loadStudent();
     }
 
-    async function loadUser() {
+    async function loadStudent() {
       try {
-        const response = await fetch(`/api/users/${userId}`);
+        const response = await fetch(`/api/students/${studentId}`);
         const data = await response.json();
 
         if (response.ok) {
@@ -88,7 +90,7 @@
                   name="name"
                   class="form-input"
                   required
-                  value="${escapeHtml(data.user.name)}"
+                  value="${escapeHtml(data.student.name)}"
                   autocomplete="name"
                 >
               </div>
@@ -103,24 +105,52 @@
                   name="email"
                   class="form-input"
                   required
-                  value="${escapeHtml(data.user.email)}"
+                  value="${escapeHtml(data.student.email)}"
                   autocomplete="email"
                 >
               </div>
 
+              <div class="form-group">
+                <label class="form-label">
+                  GRADE/YEAR <span class="required">*</span>
+                </label>
+                <select id="grade" name="grade" class="form-input" required>
+                  <option value="">Select grade/year</option>
+                  <option value="Freshman" ${data.student.grade === 'Freshman' ? 'selected' : ''}>Freshman</option>
+                  <option value="Sophomore" ${data.student.grade === 'Sophomore' ? 'selected' : ''}>Sophomore</option>
+                  <option value="Junior" ${data.student.grade === 'Junior' ? 'selected' : ''}>Junior</option>
+                  <option value="Senior" ${data.student.grade === 'Senior' ? 'selected' : ''}>Senior</option>
+                  <option value="Graduate" ${data.student.grade === 'Graduate' ? 'selected' : ''}>Graduate</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  MAJOR
+                </label>
+                <input
+                  type="text"
+                  id="major"
+                  name="major"
+                  class="form-input"
+                  value="${escapeHtml(data.student.major || '')}"
+                  placeholder="Enter major (optional)"
+                >
+              </div>
+
               <div class="form-actions">
-                <button type="submit" class="btn btn-primary">UPDATE USER</button>
-                <a href="/view-users.html" class="btn btn-secondary">CANCEL</a>
+                <button type="submit" class="btn btn-primary">UPDATE STUDENT</button>
+                <a href="/students.html" class="btn btn-secondary">CANCEL</a>
               </div>
             </form>
           `;
 
           document.getElementById('editForm').addEventListener('submit', handleSubmit);
         } else {
-          formContent.innerHTML = `<p style="text-align:center;color:#ef4444;">User not found</p>`;
+          formContent.innerHTML = `<p style="text-align:center;color:#ef4444;">Student not found</p>`;
         }
       } catch (error) {
-        formContent.innerHTML = `<p style="text-align:center;color:#ef4444;">Failed to load user data</p>`;
+        formContent.innerHTML = `<p style="text-align:center;color:#ef4444;">Failed to load student data</p>`;
       }
     }
 
@@ -129,14 +159,16 @@
 
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
+      const grade = document.getElementById('grade').value;
+      const major = document.getElementById('major').value.trim();
 
       try {
-        const response = await fetch(`/api/users/${userId}`, {
+        const response = await fetch(`/api/students/${studentId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ name, email })
+          body: JSON.stringify({ name, email, grade, major })
         });
 
         const data = await response.json();
@@ -144,13 +176,13 @@
         if (response.ok) {
           showMessage('success', '✓ ' + data.message + ' - Redirecting...');
           setTimeout(() => {
-            window.location.href = '/view-users.html';
+            window.location.href = '/students.html';
           }, 1500);
         } else {
           showMessage('error', '✗ ' + data.message);
         }
       } catch (error) {
-        showMessage('error', '✗ Failed to update user. Please try again.');
+        showMessage('error', '✗ Failed to update student. Please try again.');
       }
     }
 

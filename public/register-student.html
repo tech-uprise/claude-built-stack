@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Registration - RadioHub</title>
+  <title>Student Registration - RadioHub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/base.css">
-  <link rel="stylesheet" href="/css/users.css">
+  <link rel="stylesheet" href="/css/register-student.css">
 </head>
 <body>
   <!-- Navigation -->
@@ -19,7 +19,7 @@
         <li><a href="/" class="nav-link">HOME</a></li>
         <li><a href="/radio.html" class="nav-link">RADIO STREAM</a></li>
         <li><a href="/radio-923.html" class="nav-link">92.3 FM</a></li>
-        <li><a href="/users.html" class="nav-link active">REGISTER USER</a></li>
+        <li><a href="/users.html" class="nav-link">REGISTER USER</a></li>
         <li><a href="/view-users.html" class="nav-link">VIEW USERS</a></li>
         <li><a href="/students.html" class="nav-link">STUDENT REGISTRY</a></li>
         <li><a href="/api-docs.html" class="nav-link">API DOCS</a></li>
@@ -31,10 +31,10 @@
   <!-- Page Header -->
   <div class="page-header">
     <div class="header-content">
-      <h1>User Registration</h1>
-      <p>Add new users to the database with validated information</p>
+      <h1>Student Registration</h1>
+      <p>Add new students to the registry with validated information</p>
       <div class="breadcrumb">
-        <a href="/">Home</a> / Register User
+        <a href="/">Home</a> / <a href="/students.html">Student Registry</a> / Register Student
       </div>
     </div>
   </div>
@@ -43,13 +43,13 @@
   <div class="container">
     <div class="form-container">
       <div class="form-header">
-        <h2>New User Information</h2>
+        <h2>New Student Information</h2>
         <p>Please provide the required information below. All fields marked with an asterisk (*) are mandatory.</p>
       </div>
 
       <div id="message" class="message"></div>
 
-      <form id="userForm">
+      <form id="studentForm">
         <div class="form-group">
           <label class="form-label">
             FULL NAME <span class="required">*</span>
@@ -75,8 +75,35 @@
             name="email"
             class="form-input"
             required
-            placeholder="name@company.com"
+            placeholder="student@university.edu"
             autocomplete="email"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            GRADE/YEAR <span class="required">*</span>
+          </label>
+          <select id="grade" name="grade" class="form-input" required>
+            <option value="">Select grade/year</option>
+            <option value="Freshman">Freshman</option>
+            <option value="Sophomore">Sophomore</option>
+            <option value="Junior">Junior</option>
+            <option value="Senior">Senior</option>
+            <option value="Graduate">Graduate</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            MAJOR
+          </label>
+          <input
+            type="text"
+            id="major"
+            name="major"
+            class="form-input"
+            placeholder="Enter major (optional)"
           >
         </div>
 
@@ -87,7 +114,7 @@
       </form>
 
       <div class="info-panel">
-        <p>💡 After successful registration, you can <a href="/view-users.html">view all registered users</a> in the user directory.</p>
+        <p>💡 After successful registration, you can <a href="/students.html">view all registered students</a> in the student registry.</p>
       </div>
     </div>
   </div>
@@ -100,7 +127,7 @@
   </footer>
 
   <script>
-    const form = document.getElementById('userForm');
+    const form = document.getElementById('studentForm');
     const messageDiv = document.getElementById('message');
 
     form.addEventListener('submit', async (e) => {
@@ -108,30 +135,32 @@
 
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
+      const grade = document.getElementById('grade').value;
+      const major = document.getElementById('major').value.trim();
 
       try {
-        const response = await fetch('/api/users', {
+        const response = await fetch('/api/students', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ name, email })
+          body: JSON.stringify({ name, email, grade, major })
         });
 
         const data = await response.json();
 
         if (response.ok) {
-          showMessage('success', '✓ ' + data.message + ' - Redirecting to user directory...');
+          showMessage('success', '✓ ' + data.message + ' - Redirecting to student registry...');
           form.reset();
 
           setTimeout(() => {
-            window.location.href = '/view-users.html';
+            window.location.href = '/students.html';
           }, 1500);
         } else {
           showMessage('error', '✗ ' + data.message);
         }
       } catch (error) {
-        showMessage('error', '✗ Failed to save user. Please try again.');
+        showMessage('error', '✗ Failed to save student. Please try again.');
       }
     });
 
