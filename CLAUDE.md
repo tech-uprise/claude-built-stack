@@ -286,9 +286,134 @@ For manual testing:
 3. Test API endpoints manually or via api-docs.html page
 4. Test radio streams by loading radio.html and radio-923.html
 
+## AWS Deployment
+
+The application is deployed on AWS using a multi-region architecture:
+
+### Production Environment
+- **URL**: https://4g3i27nzmy.us-west-2.awsapprunner.com
+- **Compute**: AWS App Runner (us-west-2, Oregon)
+- **Database**: AWS RDS PostgreSQL 17 (us-west-1, Northern California)
+- **Registry**: Amazon ECR (us-west-2)
+
+### Key Configuration
+
+**Database Connection with SSL** (db.js:27):
+```javascript
+ssl: process.env.DB_HOST?.includes('rds.amazonaws.com')
+  ? { rejectUnauthorized: false }
+  : false
+```
+
+AWS RDS requires SSL connections. The db.js file automatically detects RDS endpoints and enables SSL. This is **critical** for production deployment.
+
+### Cross-Region Architecture
+
+**Why Cross-Region?**
+- AWS App Runner is not available in us-west-1
+- RDS database was already provisioned in us-west-1
+- AWS backbone provides ~5-10ms latency between regions
+
+**Network Flow**:
+```
+App Runner (us-west-2) --SSL/TLS--> RDS PostgreSQL (us-west-1)
+```
+
+### IAM Configuration
+
+**Required IAM Role**: `AppRunnerECRAccessRole`
+
+This role must have the policy `AWSAppRunnerServicePolicyForECRAccess` attached to allow App Runner to pull Docker images from ECR.
+
+```bash
+# Attach policy to role
+aws iam attach-role-policy \
+  --role-name AppRunnerECRAccessRole \
+  --policy-arn arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess
+```
+
+### Environment Variables (App Runner)
+
+```
+NODE_ENV=production
+PORT=3000
+DB_HOST=radiocalco-db.crwe2e4w2r6a.us-west-1.rds.amazonaws.com
+DB_PORT=5432
+DB_NAME=radiocalco_dev
+DB_USER=postgres
+DB_PASSWORD=<your-password>
+```
+
+### Deployment Commands
+
+```bash
+# Build and push Docker image to ECR
+aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin <account-id>.dkr.ecr.us-west-2.amazonaws.com
+docker build -t radiocalco-app:latest .
+docker tag radiocalco-app:latest <account-id>.dkr.ecr.us-west-2.amazonaws.com/radiocalco-app:latest
+docker push <account-id>.dkr.ecr.us-west-2.amazonaws.com/radiocalco-app:latest
+
+# Trigger App Runner deployment
+aws apprunner start-deployment --service-arn <service-arn> --region us-west-2
+```
+
+### Common Issues and Solutions
+
+**Issue 1: "no encryption" error**
+- **Cause**: Missing SSL configuration for RDS
+- **Solution**: SSL is auto-enabled in db.js for RDS endpoints
+- **Verification**: Check db.js:27 for SSL configuration
+
+**Issue 2: "Invalid Access Role"**
+- **Cause**: AppRunnerECRAccessRole missing permissions
+- **Solution**: Attach `AWSAppRunnerServicePolicyForECRAccess` policy
+- **Verification**: `aws iam list-attached-role-policies --role-name AppRunnerECRAccessRole`
+
+**Issue 3: Region mismatch**
+- **Cause**: ECR and App Runner in different regions
+- **Solution**: Ensure both are in us-west-2
+- **Note**: App Runner not available in us-west-1
+
+**Issue 4: Cross-region database latency**
+- **Current**: ~5-10ms (acceptable)
+- **If problematic**: Migrate RDS to us-west-2
+- **See**: DEPLOYMENT.md for RDS migration guide
+
+### CI/CD with GitHub Actions
+
+The project includes automated deployment via GitHub Actions (`.github/workflows/deploy.yml`):
+- Runs tests on every push
+- Builds and pushes Docker image to ECR
+- Triggers App Runner deployment (if service exists)
+
+**GitHub Secrets Required**:
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_REGION` (set to `us-west-2`)
+- `ECR_REPOSITORY` (set to `radiocalco-app`)
+
+### Monitoring
+
+**Health Check**: App Runner monitors `/api/health`
+- Interval: 10 seconds
+- Timeout: 5 seconds
+- Healthy threshold: 1
+- Unhealthy threshold: 3
+
+**Logs**: View App Runner logs
+```bash
+aws logs tail /aws/apprunner/radiocalco-app/<service-id>/application --region us-west-2 --follow
+```
+
+**Database**: Monitor RDS via CloudWatch
+- CPU utilization
+- Connection count
+- Free storage space
+
 ## Known Limitations
 
 - **Rating system**: IP-based, can be bypassed with VPN or shared in corporate networks
 - **No authentication**: User management has no access control
 - **Single server instance**: No horizontal scaling support
 - **No rate limiting**: API endpoints can be called without restrictions
+- **Cross-region database**: App Runner (us-west-2) connects to RDS (us-west-1) with ~5-10ms latency

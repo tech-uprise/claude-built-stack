@@ -207,6 +207,36 @@ npm run dev
 - Radio player: http://localhost:3000/radio.html
 - API docs: http://localhost:3000/api-docs.html
 
+### AWS Production Deployment
+
+The application is deployed on AWS using a multi-region architecture. See `DEPLOYMENT.md` for complete deployment guide.
+
+**Live Production URL**: https://4g3i27nzmy.us-west-2.awsapprunner.com
+
+**Architecture**:
+- **Compute**: AWS App Runner (us-west-2, Oregon) - 1 vCPU, 2GB RAM
+- **Database**: AWS RDS PostgreSQL 17 (us-west-1, Northern California) - db.t3.micro
+- **Registry**: Amazon ECR (us-west-2) - Docker image storage
+- **CI/CD**: GitHub Actions - Automated testing and deployment
+
+**Key Features**:
+- Auto-scaling: 1-3 instances based on load
+- SSL/TLS enabled for database connections
+- Automated backups (7-day retention)
+- Health monitoring via `/api/health` endpoint
+- CloudWatch logging and metrics
+
+**Quick Deploy**:
+```bash
+# See DEPLOYMENT.md for full instructions
+git push origin master  # Triggers GitHub Actions workflow
+```
+
+For detailed AWS deployment instructions, troubleshooting, and cost estimates, see:
+- `DEPLOYMENT.md` - Step-by-step AWS deployment guide
+- `ARCHITECTURE.md` - System architecture and design decisions
+- `CLAUDE.md` - AWS deployment section with common issues
+
 ## 🏗️ Architecture
 
 ### Request Flow
@@ -382,6 +412,10 @@ brew services list
 - [x] JavaScript code refactoring (DRY with shared utils.js)
 - [x] CSS refactoring (shared base.css)
 - [x] Docker containerization with docker-compose
+- [x] AWS production deployment (App Runner + RDS)
+- [x] CI/CD pipeline with GitHub Actions
+- [x] SSL/TLS configuration for RDS connections
+- [x] Multi-region architecture documentation
 
 ### In Progress / Planned
 - [ ] Add authentication (JWT or session-based)
@@ -389,7 +423,8 @@ brew services list
 - [ ] Add end-to-end tests (Playwright/Cypress)
 - [ ] Implement WebSocket for real-time updates
 - [ ] Add user roles and permissions
-- [ ] CI/CD pipeline with GitHub Actions
+- [ ] Migrate RDS to us-west-2 (optional optimization)
+- [ ] CloudWatch dashboards and alarms
 - [ ] Kubernetes deployment manifests
 
 ## 📄 License
