@@ -23,6 +23,8 @@ const pool = new Pool({
   database: process.env.DB_NAME || 'radiocalco_dev',
   user: process.env.DB_USER || process.env.USER,
   password: process.env.DB_PASSWORD || '',
+  // Enable SSL for AWS RDS connections
+  ssl: process.env.DB_HOST?.includes('rds.amazonaws.com') ? { rejectUnauthorized: false } : false,
 });
 
 // Test connection on startup
