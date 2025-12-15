@@ -6,8 +6,8 @@ on:
   workflow_dispatch:  # Allow manual trigger from GitHub UI
 
 env:
-  AWS_REGION: ${{ secrets.AWS_REGION || 'us-west-2' }}
-  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY || 'radiocalco-app' }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
 
 jobs:
   test:
@@ -139,6 +139,7 @@ jobs:
         run: |
           # Check if App Runner service exists
           SERVICE_ARN=$(aws apprunner list-services \
+            --region ${{ env.AWS_REGION }} \
             --query "ServiceSummaryList[?ServiceName=='radiocalco-app'].ServiceArn" \
             --output text 2>/dev/null || echo "")
 
@@ -153,7 +154,9 @@ jobs:
           echo "Triggering deployment with latest image..."
 
           # Trigger App Runner deployment
-          aws apprunner start-deployment --service-arn "$SERVICE_ARN"
+          aws apprunner start-deployment \
+            --region ${{ env.AWS_REGION }} \
+            --service-arn "$SERVICE_ARN"
 
           echo "✅ Deployment triggered successfully!"
           echo "Monitor deployment status in AWS Console:"
@@ -163,6 +166,7 @@ jobs:
         if: success()
         run: |
           SERVICE_ARN=$(aws apprunner list-services \
+            --region ${{ env.AWS_REGION }} \
             --query "ServiceSummaryList[?ServiceName=='radiocalco-app'].ServiceArn" \
             --output text)
 
@@ -175,6 +179,7 @@ jobs:
 
           for i in {1..60}; do
             STATUS=$(aws apprunner describe-service \
+              --region ${{ env.AWS_REGION }} \
               --service-arn "$SERVICE_ARN" \
               --query 'Service.Status' \
               --output text)
@@ -185,6 +190,7 @@ jobs:
               echo "✅ Deployment completed successfully!"
 
               SERVICE_URL=$(aws apprunner describe-service \
+                --region ${{ env.AWS_REGION }} \
                 --service-arn "$SERVICE_ARN" \
                 --query 'Service.ServiceUrl' \
                 --output text)
@@ -216,11 +222,13 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           SERVICE_ARN=$(aws apprunner list-services \
+            --region ${{ env.AWS_REGION }} \
             --query "ServiceSummaryList[?ServiceName=='radiocalco-app'].ServiceArn" \
             --output text 2>/dev/null || echo "")
 
           if [ -n "$SERVICE_ARN" ]; then
             SERVICE_URL=$(aws apprunner describe-service \
+              --region ${{ env.AWS_REGION }} \
               --service-arn "$SERVICE_ARN" \
               --query 'Service.ServiceUrl' \
               --output text 2>/dev/null || echo "unknown")
