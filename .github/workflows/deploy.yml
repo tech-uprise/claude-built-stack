@@ -136,12 +136,10 @@ jobs:
 
       - name: Deploy to App Runner
         id: deploy-apprunner
-        env:
-          AWS_REGION: ${{ env.AWS_REGION }}
         run: |
           # Check if App Runner service exists
           SERVICE_ARN=$(aws apprunner list-services \
-            --region $AWS_REGION \
+            --region us-west-2 \
             --query "ServiceSummaryList[?ServiceName=='radiocalco-app'].ServiceArn" \
             --output text 2>/dev/null || echo "")
 
@@ -157,20 +155,18 @@ jobs:
 
           # Trigger App Runner deployment
           aws apprunner start-deployment \
-            --region $AWS_REGION \
+            --region us-west-2 \
             --service-arn "$SERVICE_ARN"
 
           echo "✅ Deployment triggered successfully!"
           echo "Monitor deployment status in AWS Console:"
-          echo "https://console.aws.amazon.com/apprunner/home?region=$AWS_REGION#/services"
+          echo "https://console.aws.amazon.com/apprunner/home?region=us-west-2#/services"
 
       - name: Wait for deployment
         if: success()
-        env:
-          AWS_REGION: ${{ env.AWS_REGION }}
         run: |
           SERVICE_ARN=$(aws apprunner list-services \
-            --region $AWS_REGION \
+            --region us-west-2 \
             --query "ServiceSummaryList[?ServiceName=='radiocalco-app'].ServiceArn" \
             --output text)
 
@@ -183,7 +179,7 @@ jobs:
 
           for i in {1..60}; do
             STATUS=$(aws apprunner describe-service \
-              --region $AWS_REGION \
+              --region us-west-2 \
               --service-arn "$SERVICE_ARN" \
               --query 'Service.Status' \
               --output text)
@@ -194,7 +190,7 @@ jobs:
               echo "✅ Deployment completed successfully!"
 
               SERVICE_URL=$(aws apprunner describe-service \
-                --region $AWS_REGION \
+                --region us-west-2 \
                 --service-arn "$SERVICE_ARN" \
                 --query 'Service.ServiceUrl' \
                 --output text)
@@ -217,24 +213,22 @@ jobs:
 
       - name: Deployment summary
         if: always()
-        env:
-          AWS_REGION: ${{ env.AWS_REGION }}
         run: |
           echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Image:** ${{ needs.build-and-push.outputs.image }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Region:** ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Region:** us-west-2" >> $GITHUB_STEP_SUMMARY
           echo "- **Service:** radiocalco-app" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           SERVICE_ARN=$(aws apprunner list-services \
-            --region $AWS_REGION \
+            --region us-west-2 \
             --query "ServiceSummaryList[?ServiceName=='radiocalco-app'].ServiceArn" \
             --output text 2>/dev/null || echo "")
 
           if [ -n "$SERVICE_ARN" ]; then
             SERVICE_URL=$(aws apprunner describe-service \
-              --region $AWS_REGION \
+              --region us-west-2 \
               --service-arn "$SERVICE_ARN" \
               --query 'Service.ServiceUrl' \
               --output text 2>/dev/null || echo "unknown")
