@@ -136,6 +136,8 @@ jobs:
 
       - name: Deploy to App Runner
         id: deploy-apprunner
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
         run: |
           # Check if App Runner service exists
           SERVICE_ARN=$(aws apprunner list-services \
@@ -164,6 +166,8 @@ jobs:
 
       - name: Wait for deployment
         if: success()
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
         run: |
           SERVICE_ARN=$(aws apprunner list-services \
             --region $AWS_REGION \
@@ -213,6 +217,8 @@ jobs:
 
       - name: Deployment summary
         if: always()
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
         run: |
           echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
