@@ -288,13 +288,23 @@ For manual testing:
 
 ## AWS Deployment
 
-The application is deployed on AWS using a multi-region architecture:
+**Status: OFFLINE** (as of December 21, 2025)
 
-### Production Environment
-- **URL**: https://4g3i27nzmy.us-west-2.awsapprunner.com
-- **Compute**: AWS App Runner (us-west-2, Oregon)
-- **Database**: AWS RDS PostgreSQL 17 (us-west-1, Northern California)
-- **Registry**: Amazon ECR (us-west-2)
+The AWS production infrastructure has been torn down to save costs (~$73/month). All resources (App Runner, RDS, ECR) have been deleted.
+
+### Restoration
+
+To restore the AWS infrastructure, follow the complete step-by-step guide:
+- **File**: `AWS_RESTORATION_GUIDE.md`
+- **Script**: `teardown-aws.sh` (for future teardowns)
+- **Estimated Time**: 30-45 minutes
+- **Previous Monthly Cost**: ~$73/month
+
+### Previous Production Environment (Reference)
+- **URL**: https://4g3i27nzmy.us-west-2.awsapprunner.com (offline)
+- **Compute**: AWS App Runner (us-west-2, Oregon) - DELETED
+- **Database**: AWS RDS PostgreSQL 17 (us-west-1, Northern California) - DELETED
+- **Registry**: Amazon ECR (us-west-2) - DELETED
 
 ### Key Configuration
 
@@ -381,18 +391,25 @@ aws apprunner start-deployment --service-arn <service-arn> --region us-west-2
 
 ### CI/CD with GitHub Actions
 
-The project includes automated deployment via GitHub Actions (`.github/workflows/deploy.yml`):
+**Status**: Deployment workflow is currently **DISABLED** (`.github/workflows/deploy.yml.disabled`)
+
+The workflow was disabled when AWS infrastructure was torn down. To re-enable:
+```bash
+git mv .github/workflows/deploy.yml.disabled .github/workflows/deploy.yml
+```
+
+**Previous Configuration** (for reference when restoring):
 - Runs tests on every push
 - Builds and pushes Docker image to ECR
 - Triggers App Runner deployment (if service exists)
 
-**GitHub Secrets Required**:
+**GitHub Secrets** (preserved for future use):
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
 - `AWS_REGION` (set to `us-west-2`)
 - `ECR_REPOSITORY` (set to `radiocalco-app`)
 
-### Monitoring
+### Monitoring (When Infrastructure Active)
 
 **Health Check**: App Runner monitors `/api/health`
 - Interval: 10 seconds
@@ -416,4 +433,4 @@ aws logs tail /aws/apprunner/radiocalco-app/<service-id>/application --region us
 - **No authentication**: User management has no access control
 - **Single server instance**: No horizontal scaling support
 - **No rate limiting**: API endpoints can be called without restrictions
-- **Cross-region database**: App Runner (us-west-2) connects to RDS (us-west-1) with ~5-10ms latency
+- **AWS Infrastructure**: Currently offline (torn down December 21, 2025 to save ~$73/month). See `AWS_RESTORATION_GUIDE.md` to restore.
